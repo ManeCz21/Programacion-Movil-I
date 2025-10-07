@@ -7,7 +7,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.proyectofinalweb.screens.CrearNotaScreen
+import com.example.proyectofinalweb.screens.DetalleNotaScreen
 import com.example.proyectofinalweb.screens.HomeScreen
+import java.net.URLDecoder
 
 @Composable
 fun AppNavHost(navController: NavHostController) {
@@ -21,11 +23,13 @@ fun AppNavHost(navController: NavHostController) {
         composable("crearNota") {
             CrearNotaScreen()
         }
-        composable("detail/{noteId}", arguments = listOf(
-            navArgument("noteId") { type = NavType.IntType }
-        )) {
-            val noteId = it.arguments?.getInt("noteId") ?: 0
-            // Placeholder: NoteDetailScreen(noteId, navController)
+        composable(
+            "detail/{notaTexto}",
+            arguments = listOf(navArgument("notaTexto") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val encodedTexto = backStackEntry.arguments?.getString("notaTexto") ?: ""
+            val notaTexto = URLDecoder.decode(encodedTexto, "UTF-8")
+            DetalleNotaScreen(notaTexto)
         }
     }
 }
