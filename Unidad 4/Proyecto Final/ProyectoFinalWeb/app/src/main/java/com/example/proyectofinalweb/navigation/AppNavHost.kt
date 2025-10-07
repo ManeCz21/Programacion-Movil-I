@@ -6,6 +6,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.example.proyectofinalweb.screens.CrearNotaScreen
 import com.example.proyectofinalweb.screens.HomeScreen
 
 @Composable
@@ -15,7 +16,10 @@ fun AppNavHost(navController: NavHostController) {
             HomeScreen(navController)
         }
         composable("add") {
-            // Placeholder: AddEditNoteScreen(navController)
+            CrearNotaScreen()
+        }
+        composable("crearNota") {
+            CrearNotaScreen()
         }
         composable("detail/{noteId}", arguments = listOf(
             navArgument("noteId") { type = NavType.IntType }
