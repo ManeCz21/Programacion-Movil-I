@@ -30,10 +30,12 @@
                 )
             },
             floatingActionButton = {
-                FloatingActionButton(onClick = {
-                    navController.navigate("add")
-                }) {
-                    Icon(Icons.Default.Add, contentDescription = "Agregar Nota")
+                FloatingActionButton(
+                    onClick = { navController.navigate("add") },
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = "Agregar nota")
                 }
             }
         ) { paddingValues ->
