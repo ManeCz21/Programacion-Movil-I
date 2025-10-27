@@ -6,7 +6,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.example.proyectofinalweb.screens.CrearNotaScreen
+import com.example.proyectofinalweb.CrearNotaScreen
 import com.example.proyectofinalweb.screens.DetalleNotaScreen
 import com.example.proyectofinalweb.screens.HomeScreen
 import java.net.URLDecoder
