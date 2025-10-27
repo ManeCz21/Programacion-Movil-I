@@ -1,8 +1,6 @@
-package com.example.proyectofinalweb.screens
+package com.example.proyectofinalweb
 
-import android.app.DatePickerDialog
 import android.app.TimePickerDialog
-import android.os.Bundle
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.BasicTextField
@@ -11,30 +9,35 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import java.util.*
+
+import com.example.proyectofinalweb.viewmodel.CrearNotaViewModel
 
 @Composable
 fun CrearNotaScreen() {
-    // State variables
-    var title by remember { mutableStateOf("") }
-    var description by remember { mutableStateOf("") }
-    var isTask by remember { mutableStateOf(false) } // Nota o Tarea
-    var taskTime by remember { mutableStateOf("00:00") }
-    var taskDate by remember { mutableStateOf("") }
+    // Obtener el ViewModel
+    val viewModel: CrearNotaViewModel = viewModel()
+
+    // State variables desde el ViewModel
+    val title by viewModel.title
+    val description by viewModel.description
+    val isTask by viewModel.isTask
+    val taskTime by viewModel.taskTime
+    val taskDate by viewModel.taskDate
 
     // Time Picker Dialog
     val context = LocalContext.current
     val calendar = Calendar.getInstance()
 
-    // Mostrar selector de hora
     fun showTimePickerDialog() {
         TimePickerDialog(
             context,
             { _, hourOfDay, minute ->
-                taskTime = String.format("%02d:%02d", hourOfDay, minute)
+                val formattedTime = String.format("%02d:%02d", hourOfDay, minute)
+                viewModel.onTaskTimeChange(formattedTime)
             },
             calendar.get(Calendar.HOUR_OF_DAY),
             calendar.get(Calendar.MINUTE),
@@ -42,25 +45,11 @@ fun CrearNotaScreen() {
         ).show()
     }
 
-    // Mostrar selector de fecha
-    fun showDatePickerDialog() {
-        val datePickerDialog = DatePickerDialog(
-            context,
-            { _, year, monthOfYear, dayOfMonth ->
-                taskDate = "$dayOfMonth/${monthOfYear + 1}/$year" // Formato: dd/MM/yyyy
-            },
-            calendar.get(Calendar.YEAR),
-            calendar.get(Calendar.MONTH),
-            calendar.get(Calendar.DAY_OF_MONTH)
-        )
-        datePickerDialog.show()
-    }
-
     Column(modifier = Modifier
         .fillMaxSize()
         .padding(16.dp)) {
 
-        // Title and Description Fields
+        // Título y Descripción
         Text(
             text = "Crear Nueva Nota o Tarea",
             style = MaterialTheme.typography.headlineMedium
@@ -70,7 +59,7 @@ fun CrearNotaScreen() {
 
         OutlinedTextField(
             value = title,
-            onValueChange = { title = it },
+            onValueChange = { viewModel.onTitleChange(it) },
             label = { Text("Título") },
             modifier = Modifier.fillMaxWidth()
         )
@@ -79,7 +68,7 @@ fun CrearNotaScreen() {
 
         OutlinedTextField(
             value = description,
-            onValueChange = { description = it },
+            onValueChange = { viewModel.onDescriptionChange(it) },
             label = { Text("Descripción") },
             modifier = Modifier.fillMaxWidth()
         )
@@ -87,11 +76,11 @@ fun CrearNotaScreen() {
         Spacer(modifier = Modifier.height(20.dp))
 
         // Selector de tipo: Nota o Tarea (Radio Buttons)
-        Text("Seleccionar Tipo:")
+        Text("Tipo de nota:")
         Row {
             RadioButton(
                 selected = !isTask,
-                onClick = { isTask = false }
+                onClick = { viewModel.onTaskTypeChange(false) }
             )
             Text("Nota", modifier = Modifier.padding(start = 4.dp))
 
@@ -99,43 +88,38 @@ fun CrearNotaScreen() {
 
             RadioButton(
                 selected = isTask,
-                onClick = { isTask = true }
+                onClick = { viewModel.onTaskTypeChange(true) }
             )
             Text("Tarea", modifier = Modifier.padding(start = 4.dp))
         }
 
-        // Si es Tarea, agregar los campos de fecha y hora
+        // Si es Tarea, mostrar los campos de fecha y hora
         if (isTask) {
             Spacer(modifier = Modifier.height(20.dp))
 
-            // Selección de la fecha de la tarea
-            Text(
-                text = if (taskDate.isEmpty()) "Selecciona la fecha" else taskDate,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { showDatePickerDialog() }
-                    .padding(16.dp),
-                style = MaterialTheme.typography.bodyMedium
+            // Fecha de la tarea
+            OutlinedTextField(
+                value = taskDate,
+                onValueChange = { viewModel.onTaskDateChange(it) },
+                label = { Text("Fecha de Tarea") },
+                modifier = Modifier.fillMaxWidth()
             )
 
             Spacer(modifier = Modifier.height(10.dp))
 
             // Hora de la tarea (Time Picker)
-            Text(
-                text = "Hora: $taskTime",
-                modifier = Modifier
-                    .clickable { showTimePickerDialog() }
-                    .padding(16.dp),
-                style = MaterialTheme.typography.bodyMedium
-            )
+            Text(text = "Hora: $taskTime", modifier = Modifier.clickable { showTimePickerDialog() })
+
+            Spacer(modifier = Modifier.height(10.dp))
         }
 
         Spacer(modifier = Modifier.height(20.dp))
 
         // Botón de guardar
         Button(onClick = {
-            // Guardar nota (o tarea) aquí
-            // Este es el lugar para guardar los datos en tu ViewModel
+            // Aquí puedes agregar la lógica para guardar la tarea o nota en el repositorio
+            // Para esta fase, solo mostramos un mensaje
+            println("Nota o Tarea guardada")
         }) {
             Text("Guardar Nota o Tarea")
         }
