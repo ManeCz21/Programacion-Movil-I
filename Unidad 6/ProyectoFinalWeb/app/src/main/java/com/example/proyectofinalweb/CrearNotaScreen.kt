@@ -13,24 +13,21 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.proyectofinalweb.model.Task
 import com.example.proyectofinalweb.viewmodel.TaskViewModel
 import java.util.*
+import androidx.compose.ui.res.stringResource
 
 @Composable
 fun CrearNotaScreen() {
-    // Obtener el ViewModel
     val viewModel: TaskViewModel = viewModel()
 
-    // State variables para los campos de texto
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
-    var isTask by remember { mutableStateOf(true) } // Nota o Tarea, por defecto es Tarea
+    var isTask by remember { mutableStateOf(true) }
     var taskTime by remember { mutableStateOf("00:00") }
     var taskDate by remember { mutableStateOf("") }
 
-    // Contexto y calendario
     val context = LocalContext.current
     val calendar = Calendar.getInstance()
 
-    // Función para mostrar el TimePicker Dialog
     fun showTimePickerDialog() {
         TimePickerDialog(
             context,
@@ -43,12 +40,11 @@ fun CrearNotaScreen() {
         ).show()
     }
 
-    // Función para mostrar el DatePicker Dialog
     fun showDatePickerDialog() {
         val datePickerDialog = DatePickerDialog(
             context,
             { _, year, monthOfYear, dayOfMonth ->
-                taskDate = "$dayOfMonth/${monthOfYear + 1}/$year" // Formato: dd/MM/yyyy
+                taskDate = "$dayOfMonth/${monthOfYear + 1}/$year"
             },
             calendar.get(Calendar.YEAR),
             calendar.get(Calendar.MONTH),
@@ -61,9 +57,9 @@ fun CrearNotaScreen() {
         .fillMaxSize()
         .padding(16.dp)) {
 
-        // Título y Descripción
+        // Título de la pantalla
         Text(
-            text = "Crear Nueva Nota o Tarea",
+            text = stringResource(id = R.string.create_task),
             style = MaterialTheme.typography.headlineMedium
         )
 
@@ -72,7 +68,7 @@ fun CrearNotaScreen() {
         OutlinedTextField(
             value = title,
             onValueChange = { title = it },
-            label = { Text("Título") },
+            label = { Text(stringResource(id = R.string.task_title)) },
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -81,20 +77,20 @@ fun CrearNotaScreen() {
         OutlinedTextField(
             value = description,
             onValueChange = { description = it },
-            label = { Text("Descripción") },
+            label = { Text(stringResource(id = R.string.task_description)) },
             modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        // Selector de tipo: Nota o Tarea (Radio Buttons)
-        Text("Tipo de nota:")
+        // Selector de tipo: Nota o Tarea
+        Text(stringResource(id = R.string.select_type))
         Row {
             RadioButton(
                 selected = !isTask,
                 onClick = { isTask = false }
             )
-            Text("Nota", modifier = Modifier.padding(start = 4.dp))
+            Text(stringResource(id = R.string.note), modifier = Modifier.padding(start = 4.dp))
 
             Spacer(modifier = Modifier.width(16.dp))
 
@@ -102,16 +98,15 @@ fun CrearNotaScreen() {
                 selected = isTask,
                 onClick = { isTask = true }
             )
-            Text("Tarea", modifier = Modifier.padding(start = 4.dp))
+            Text(stringResource(id = R.string.task), modifier = Modifier.padding(start = 4.dp))
         }
 
-        // Si es Tarea, mostrar los campos de fecha y hora
         if (isTask) {
             Spacer(modifier = Modifier.height(20.dp))
 
-            // Campo de Fecha de Tarea
+            // Selector de fecha
             Text(
-                text = if (taskDate.isEmpty()) "Selecciona la fecha" else taskDate,
+                text = if (taskDate.isEmpty()) stringResource(id = R.string.select_date) else taskDate,
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { showDatePickerDialog() }
@@ -121,23 +116,19 @@ fun CrearNotaScreen() {
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            // Campo de Hora de Tarea (Time Picker)
+            // Selector de hora
             Text(
-                text = "Hora: $taskTime",
+                text = "${stringResource(id = R.string.select_time)}: $taskTime",
                 modifier = Modifier
                     .clickable { showTimePickerDialog() }
                     .padding(16.dp),
                 style = MaterialTheme.typography.bodyMedium
             )
-
-            Spacer(modifier = Modifier.height(10.dp))
         }
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        // Botón de guardar
         Button(onClick = {
-            // Crear tarea con los datos del formulario
             val task = Task(
                 title = title,
                 description = description,
@@ -145,10 +136,10 @@ fun CrearNotaScreen() {
                 taskTime = taskTime,
                 taskDate = taskDate
             )
-            // Llamamos al ViewModel para guardar la tarea
             viewModel.addTask(task)
         }) {
-            Text("Guardar Nota o Tarea")
+            Text(stringResource(id = R.string.save_task))
         }
     }
 }
+
