@@ -14,11 +14,9 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.proyectofinalweb.R
 import com.example.proyectofinalweb.components.NoteItem
-import com.example.proyectofinalweb.model.Note
 import com.example.proyectofinalweb.ui.rememberScreenType
 import com.example.proyectofinalweb.ui.ScreenType
 import com.example.proyectofinalweb.viewmodel.NotaViewModel
-import java.net.URLEncoder
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -26,7 +24,7 @@ fun HomeScreen(
     navController: NavController,
     viewModel: NotaViewModel
 ) {
-    // 🔹 Obtenemos las notas reales desde la BD (Room)
+    // 🔹 Obtenemos las notas desde el ViewModel
     val notes by viewModel.notes.collectAsState(initial = emptyList())
 
     // 🔹 Detectamos tipo de pantalla
@@ -48,6 +46,7 @@ fun HomeScreen(
             }
         }
     ) { paddingValues ->
+
         when (screenType) {
             ScreenType.Compact -> {
                 // 🔸 Diseño para pantallas pequeñas
@@ -59,10 +58,7 @@ fun HomeScreen(
                 ) {
                     items(notes) { note ->
                         NoteItem(note = note) {
-                            val encoded = URLEncoder.encode(
-                                "${note.title}: ${note.description}",
-                                "UTF-8"
-                            )
+                            // Navega con el ID (correcto)
                             navController.navigate("detail/${note.id}")
                         }
                     }
@@ -70,7 +66,7 @@ fun HomeScreen(
             }
 
             ScreenType.Medium, ScreenType.Expanded -> {
-                // 🔸 Diseño para tablets: lista y detalle lado a lado
+                // 🔸 Diseño para tablets: lista + detalle lado a lado
                 Row(
                     modifier = Modifier
                         .fillMaxSize()
@@ -84,11 +80,8 @@ fun HomeScreen(
                     ) {
                         items(notes) { note ->
                             NoteItem(note = note) {
-                                val encoded = URLEncoder.encode(
-                                    "${note.title}: ${note.description}",
-                                    "UTF-8"
-                                )
-                                navController.navigate("detail/$encoded")
+                                // También navega con ID
+                                navController.navigate("detail/${note.id}")
                             }
                         }
                     }

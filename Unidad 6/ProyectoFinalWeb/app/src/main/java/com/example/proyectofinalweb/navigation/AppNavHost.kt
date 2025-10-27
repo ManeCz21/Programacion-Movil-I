@@ -10,7 +10,6 @@ import com.example.proyectofinalweb.screens.CrearNotaScreen
 import com.example.proyectofinalweb.screens.DetalleNotaScreen
 import com.example.proyectofinalweb.screens.HomeScreen
 import com.example.proyectofinalweb.viewmodel.NotaViewModel
-import java.net.URLDecoder
 
 @Composable
 fun AppNavHost(
@@ -19,40 +18,25 @@ fun AppNavHost(
 ) {
     NavHost(navController = navController, startDestination = "home") {
 
-        // Pantalla principal
         composable("home") {
-            HomeScreen(
-                navController = navController,
-                viewModel = notaViewModel
-            )
+            HomeScreen(navController = navController, viewModel = notaViewModel)
         }
 
-        // Pantalla para crear una nota
         composable("add") {
-            CrearNotaScreen(
-                navController = navController,
-                viewModel = notaViewModel
-            )
+            CrearNotaScreen(navController = navController, viewModel = notaViewModel)
         }
 
-        // Alias de crearNota (por si se usa otro nombre en la navegación)
         composable("crearNota") {
-            CrearNotaScreen(
-                navController = navController,
-                viewModel = notaViewModel
-            )
+            CrearNotaScreen(navController = navController, viewModel = notaViewModel)
         }
 
-        // Pantalla de detalle (usa texto codificado en la ruta)
         composable(
-            "detail/{notaTexto}",
-            arguments = listOf(navArgument("notaTexto") { type = NavType.StringType })
+            "detail/{noteId}",
+            arguments = listOf(navArgument("noteId") { type = NavType.IntType })
         ) { backStackEntry ->
-            val encodedTexto = backStackEntry.arguments?.getString("notaTexto") ?: ""
-            val notaTexto = URLDecoder.decode(encodedTexto, "UTF-8")
-
+            val id = backStackEntry.arguments?.getInt("noteId") ?: 0
             DetalleNotaScreen(
-                notaTexto = notaTexto,
+                noteId = id,
                 navController = navController,
                 viewModel = notaViewModel
             )
