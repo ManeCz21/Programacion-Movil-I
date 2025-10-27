@@ -1,3 +1,6 @@
+import org.gradle.kotlin.dsl.implementation
+
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -60,6 +63,12 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     implementation("androidx.navigation:navigation-compose:2.9.5")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.9.4")
-    implementation("androidx.room:room-runtime:2.8.3")
+    // Room, WorkManager, Gson, Coil
+    implementation("androidx.room:room-runtime:2.5.2")
+    kapt ("androidx.room:room-compiler:2.5.2")
+    implementation (libs.androidx.room.ktx.v252)
+    implementation ("androidx.work:work-runtime-ktx:2.11.0")
+    implementation("com.google.code.gson:gson:2.13.2")
+    implementation("io.coil-kt:coil-compose:2.7.0")
     kapt(libs.room.compiler)
 }

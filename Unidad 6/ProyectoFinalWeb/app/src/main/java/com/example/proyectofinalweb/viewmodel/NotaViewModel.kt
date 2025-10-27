@@ -2,17 +2,36 @@ package com.example.proyectofinalweb.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.proyectofinalweb.model.Task
-import com.example.proyectofinalweb.data.TaskRepository
+import com.example.proyectofinalweb.data.NoteRepository
+import com.example.proyectofinalweb.model.Note
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-class NotaViewModel(private val repository: TaskRepository) : ViewModel() {
+class NotaViewModel(private val repo: NoteRepository) : ViewModel() {
 
-    fun saveTask(task: Task) {
+    val notes = repo.getAllNotes()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    fun getNoteById(id: Int, onResult: (Note?) -> Unit) {
         viewModelScope.launch {
-            repository.saveTask(task)
+            val n = repo.getById(id)
+            onResult(n)
         }
     }
 
-    // Si en el futuro agregas más funcionalidades, puedes ir añadiendo métodos al ViewModel
+    fun addNote(note: Note, onDone: (() -> Unit)? = null) = viewModelScope.launch {
+        repo.insert(note)
+        onDone?.invoke()
+    }
+
+    fun updateNote(note: Note, onDone: (() -> Unit)? = null) = viewModelScope.launch {
+        repo.update(note)
+        onDone?.invoke()
+    }
+
+    fun deleteNote(note: Note, onDone: (() -> Unit)? = null) = viewModelScope.launch {
+        repo.delete(note)
+        onDone?.invoke()
+    }
 }
