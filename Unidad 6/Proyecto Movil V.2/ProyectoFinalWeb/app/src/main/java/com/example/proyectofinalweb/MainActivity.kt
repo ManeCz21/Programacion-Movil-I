@@ -15,7 +15,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             ProyectoFinalWebTheme {
                 val navController = rememberNavController()
-                AppNavHost(navController = navController, noteDao = appContainer.noteDao)
+                AppNavHost(navController = navController, noteDao = appContainer.noteDao, taskDao = appContainer.taskDao)
             }
         }
     }

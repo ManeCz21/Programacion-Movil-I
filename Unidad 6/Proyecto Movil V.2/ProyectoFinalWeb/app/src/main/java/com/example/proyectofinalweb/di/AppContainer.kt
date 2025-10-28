@@ -16,4 +16,8 @@ class AppContainer(private val context: Context) {
     val noteDao by lazy {
         db.noteDao()
     }
+
+    val taskDao by lazy {
+        db.taskDao()
+    }
 }

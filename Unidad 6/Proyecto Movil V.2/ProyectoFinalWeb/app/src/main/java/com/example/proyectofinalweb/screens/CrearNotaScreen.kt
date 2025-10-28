@@ -11,16 +11,17 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.proyectofinalweb.db.NoteDao
+import com.example.proyectofinalweb.db.TaskDao
 import com.example.proyectofinalweb.model.Note
-import com.example.proyectofinalweb.model.NoteType
+import com.example.proyectofinalweb.model.Task
 import kotlinx.coroutines.launch
 import java.util.*
 
 @Composable
-fun CrearNotaScreen(noteDao: NoteDao, navController: NavController) {
+fun CrearNotaScreen(noteDao: NoteDao, taskDao: TaskDao, navController: NavController) {
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
-    var isTask by remember { mutableStateOf(false) } // Nota o Tarea
+    var isTask by remember { mutableStateOf(false) }
     var taskTime by remember { mutableStateOf("00:00") }
     var taskDate by remember { mutableStateOf("") }
 
@@ -45,7 +46,7 @@ fun CrearNotaScreen(noteDao: NoteDao, navController: NavController) {
         val datePickerDialog = DatePickerDialog(
             context,
             { _, year, monthOfYear, dayOfMonth ->
-                taskDate = "$dayOfMonth/${monthOfYear + 1}/$year" // Formato: dd/MM/yyyy
+                taskDate = "$dayOfMonth/${monthOfYear + 1}/$year"
             },
             calendar.get(Calendar.YEAR),
             calendar.get(Calendar.MONTH),
@@ -129,16 +130,26 @@ fun CrearNotaScreen(noteDao: NoteDao, navController: NavController) {
 
         Button(onClick = {
             coroutineScope.launch {
-                val note = Note(
-                    title = title,
-                    description = description,
-                    type = if (isTask) NoteType.TASK else NoteType.NOTE
-                )
-                noteDao.insertNote(note)
+                if (isTask) {
+                    val task = Task(
+                        title = title,
+                        description = description,
+                        date = taskDate,
+                        time = taskTime
+                    )
+                    taskDao.insertTask(task)
+                } else {
+                    val note = Note(
+                        title = title,
+                        description = description,
+                        type = com.example.proyectofinalweb.model.NoteType.NOTE // This is not needed anymore, but let's keep it for now
+                    )
+                    noteDao.insertNote(note)
+                }
                 navController.popBackStack()
             }
         }) {
-            Text("Guardar Nota o Tarea")
+            Text("Guardar")
         }
     }
 }
