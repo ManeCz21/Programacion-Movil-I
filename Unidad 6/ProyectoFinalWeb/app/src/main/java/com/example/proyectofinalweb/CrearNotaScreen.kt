@@ -1,4 +1,4 @@
-package com.example.proyectofinalweb.screens
+package com.example.proyectofinalweb
 
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
@@ -30,8 +30,9 @@ import java.util.*
 fun CrearNotaScreen(navController: NavController, viewModel: NotaViewModel) {
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
-    var notificationDate by remember { mutableStateOf("") }
-    var notificationTime by remember { mutableStateOf("00:00") }
+    var isTask by remember { mutableStateOf(false) } // Nota o Tarea
+    var taskTime by remember { mutableStateOf("00:00") }
+    var taskDate by remember { mutableStateOf("") }
     var selectedUris by remember { mutableStateOf<List<Uri>>(emptyList()) }
 
     val context = LocalContext.current
@@ -43,7 +44,7 @@ fun CrearNotaScreen(navController: NavController, viewModel: NotaViewModel) {
         DatePickerDialog(
             context,
             { _, year, month, day ->
-                notificationDate = "$day/${month + 1}/$year"
+                taskDate = "$day/${month + 1}/$year"
                 calendar.set(Calendar.YEAR, year)
                 calendar.set(Calendar.MONTH, month)
                 calendar.set(Calendar.DAY_OF_MONTH, day)
@@ -58,9 +59,7 @@ fun CrearNotaScreen(navController: NavController, viewModel: NotaViewModel) {
         TimePickerDialog(
             context,
             { _, hourOfDay, minute ->
-                notificationTime = String.format("%02d:%02d", hourOfDay, minute)
-                calendar.set(Calendar.HOUR_OF_DAY, hourOfDay)
-                calendar.set(Calendar.MINUTE, minute)
+                taskTime = String.format("%02d:%02d", hourOfDay, minute)
             },
             calendar.get(Calendar.HOUR_OF_DAY),
             calendar.get(Calendar.MINUTE),
@@ -90,12 +89,13 @@ fun CrearNotaScreen(navController: NavController, viewModel: NotaViewModel) {
             .padding(16.dp)
     ) {
         Text(
-            text = stringResource(id = R.string.create_note),
+            text = stringResource(id = R.string.create_task),
             style = MaterialTheme.typography.headlineMedium
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Título y descripción
         OutlinedTextField(
             value = title,
             onValueChange = { title = it },
@@ -115,11 +115,67 @@ fun CrearNotaScreen(navController: NavController, viewModel: NotaViewModel) {
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        // --- Select multimedia ---
-        Button(onClick = { pickMediaLauncher.launch(arrayOf("image/*", "video/*")) }) {
-            Text("Agregar multimedia")
+        // Selector de tipo: Nota o Tarea (Radio Buttons)
+        Text(stringResource(id = R.string.select_type))
+        Row {
+            RadioButton(
+                selected = !isTask,
+                onClick = { isTask = false }
+            )
+            Text(stringResource(id = R.string.note), modifier = Modifier.padding(start = 4.dp))
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            RadioButton(
+                selected = isTask,
+                onClick = { isTask = true }
+            )
+            Text(stringResource(id = R.string.task), modifier = Modifier.padding(start = 4.dp))
         }
 
+        // Si es Tarea, agregar los campos de fecha y hora
+        if (isTask) {
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // Selección de la fecha de la tarea
+            Text(
+                text = if (taskDate.isEmpty()) stringResource(id = R.string.select_date) else taskDate,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { showDatePickerDialog() }
+                    .padding(16.dp),
+                style = MaterialTheme.typography.bodyMedium
+            )
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            // Hora de la tarea (Time Picker)
+            Text(
+                text = "${stringResource(id = R.string.select_time)}: $taskTime",
+                modifier = Modifier
+                    .clickable { showTimePickerDialog() }
+                    .padding(16.dp),
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+
+        // --- Selección de multimedia (imágenes o videos) ---
+        Spacer(modifier = Modifier.height(20.dp))
+        // --- Select multimedia ---
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()  // Toma el ancho completo
+                .padding(16.dp),  // Añade un padding adicional
+            horizontalArrangement = Arrangement.Center  // Centra el botón dentro del Row
+        ) {
+            Button(
+                onClick = { pickMediaLauncher.launch(arrayOf("image/", "video/")) }
+            ) {
+                Text(stringResource(id = R.string.add_multimedia))
+            }
+        }
+
+        // Si hay archivos seleccionados, mostrar las miniaturas
         if (selectedUris.isNotEmpty()) {
             Spacer(modifier = Modifier.height(12.dp))
             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -135,36 +191,14 @@ fun CrearNotaScreen(navController: NavController, viewModel: NotaViewModel) {
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        // --- Date and Time for notification ---
-        Text(
-            text = if (notificationDate.isEmpty())
-                stringResource(id = R.string.select_date)
-            else
-                "Fecha: $notificationDate",
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { showDatePickerDialog() }
-                .padding(8.dp)
-        )
-
-        Text(
-            text = "${stringResource(id = R.string.select_time)}: $notificationTime",
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { showTimePickerDialog() }
-                .padding(8.dp)
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // --- Save button ---
+        // Botón de guardar
         Button(
             onClick = {
                 if (title.isNotBlank() && description.isNotBlank()) {
                     val notificationMillis = try {
-                        if (notificationDate.isNotEmpty()) {
+                        if (taskDate.isNotEmpty()) {
                             val sdf = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
-                            sdf.parse("$notificationDate $notificationTime")?.time
+                            sdf.parse("$taskDate $taskTime")?.time
                         } else null
                     } catch (e: Exception) {
                         null
@@ -180,13 +214,14 @@ fun CrearNotaScreen(navController: NavController, viewModel: NotaViewModel) {
                         notificationTime = notificationMillis
                     )
 
+                    // Llamar al ViewModel para agregar la nota o tarea
                     viewModel.addNote(newNote)
-                    navController.popBackStack()
+                    navController.popBackStack() // Regresar a la pantalla anterior
                 }
             },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text(stringResource(id = R.string.save_note))
+            Text(stringResource(id = R.string.save_task))
         }
     }
 }

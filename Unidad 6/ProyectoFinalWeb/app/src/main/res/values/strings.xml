@@ -5,16 +5,15 @@
     <string name="notes_and_tasks">Notas y Tareas</string>
 
     <string name="create_task">Crear Tarea o Nota</string>
-    <string name="create_note">Crear Nota</string>
     <string name="task_title">Título</string>
     <string name="task_description">Descripción</string>
     <string name="select_type">Seleccionar el Tipo:</string>
     <string name="note">Nota</string>
     <string name="task">Tarea</string>
-    <string name="save_task">Guardar tarea</string>
-    <string name="save_note">Guardar nota</string>
     <string name="select_date">Seleccionar fecha</string>
     <string name="select_time">Hora</string>
+    <string name="add_multimedia">Agregar multimedia</string>
+    <string name="save_task">Guardar Tarea o Nota</string>
 
 
 </resources>
