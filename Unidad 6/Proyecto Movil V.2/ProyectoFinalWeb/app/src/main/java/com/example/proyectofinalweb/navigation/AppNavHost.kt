@@ -12,6 +12,7 @@ import com.example.proyectofinalweb.screens.CrearNotaScreen
 import com.example.proyectofinalweb.screens.DetalleNotaScreen
 import com.example.proyectofinalweb.screens.DetalleTareaScreen
 import com.example.proyectofinalweb.screens.EditarNotaScreen
+import com.example.proyectofinalweb.screens.EditarTareaScreen
 import com.example.proyectofinalweb.screens.HomeScreen
 
 @Composable
@@ -46,6 +47,13 @@ fun AppNavHost(navController: NavHostController, noteDao: NoteDao, taskDao: Task
         ) { backStackEntry ->
             val taskId = backStackEntry.arguments?.getInt("taskId") ?: 0
             DetalleTareaScreen(taskId = taskId, taskDao = taskDao, navController = navController)
+        }
+        composable(
+            "editTask/{taskId}",
+            arguments = listOf(navArgument("taskId") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val taskId = backStackEntry.arguments?.getInt("taskId") ?: 0
+            EditarTareaScreen(taskId = taskId, taskDao = taskDao, navController = navController)
         }
     }
 }

@@ -5,17 +5,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -23,50 +18,53 @@ import com.example.proyectofinalweb.db.NoteDao
 import com.example.proyectofinalweb.model.Note
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetalleNotaScreen(noteId: Int, noteDao: NoteDao, navController: NavController) {
     var note by remember { mutableStateOf<Note?>(null) }
     val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(noteId) {
-        // This is not efficient. A real app would have a better way to get a single note.
         noteDao.getAllNotes().collect { notes ->
             note = notes.find { it.id == noteId }
         }
     }
 
-    note?.let { currentNote ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
-        ) {
-            Text(text = currentNote.title, style = MaterialTheme.typography.headlineMedium)
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(text = currentNote.description, style = MaterialTheme.typography.bodyMedium)
-            Spacer(modifier = Modifier.height(16.dp))
-            Button(onClick = {
-                navController.navigate("edit/${currentNote.id}")
-            }) {
-                Text("Editar")
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-            Button(
-                onClick = {
-                    coroutineScope.launch {
-                        noteDao.deleteNote(currentNote)
-                        navController.popBackStack()
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Detalle de la Nota") },
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Regresar")
                     }
                 },
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                actions = {
+                    IconButton(onClick = { navController.navigate("edit/${note?.id}") }) {
+                        Icon(Icons.Default.Edit, contentDescription = "Editar")
+                    }
+                    IconButton(onClick = {
+                        coroutineScope.launch {
+                            note?.let { noteDao.deleteNote(it) }
+                            navController.popBackStack()
+                        }
+                    }) {
+                        Icon(Icons.Default.Delete, contentDescription = "Eliminar")
+                    }
+                }
+            )
+        }
+    ) { paddingValues ->
+        note?.let { currentNote ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(16.dp)
             ) {
-                Text("Eliminar")
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-            Button(onClick = {
-                navController.popBackStack()
-            }) {
-                Text("Regresar")
+                Text(text = currentNote.title, style = MaterialTheme.typography.headlineLarge)
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(text = currentNote.description, style = MaterialTheme.typography.bodyLarge)
             }
         }
     }

@@ -7,11 +7,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.example.proyectofinalweb.model.Task
 
@@ -22,6 +25,13 @@ fun TaskItem(task: Task, onTaskCompletedChange: (Task) -> Unit, onTaskClick: () 
             .fillMaxWidth()
             .padding(8.dp)
             .clickable { onTaskClick() },
+        colors = CardDefaults.cardColors(
+            containerColor = if (task.isCompleted) {
+                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
+            } else {
+                MaterialTheme.colorScheme.surface
+            }
+        )
     ) {
         Row(
             modifier = Modifier
@@ -31,8 +41,14 @@ fun TaskItem(task: Task, onTaskCompletedChange: (Task) -> Unit, onTaskClick: () 
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                Text(text = task.title)
-                Text(text = task.description)
+                Text(
+                    text = task.title,
+                    textDecoration = if (task.isCompleted) TextDecoration.LineThrough else TextDecoration.None
+                )
+                Text(
+                    text = task.description,
+                    textDecoration = if (task.isCompleted) TextDecoration.LineThrough else TextDecoration.None
+                )
             }
             Checkbox(
                 checked = task.isCompleted,

@@ -13,32 +13,41 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.proyectofinalweb.db.NoteDao
 import com.example.proyectofinalweb.db.TaskDao
-import com.example.proyectofinalweb.model.Note
 import com.example.proyectofinalweb.model.Task
 import kotlinx.coroutines.launch
 import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CrearNotaScreen(noteDao: NoteDao, taskDao: TaskDao, navController: NavController) {
+fun EditarTareaScreen(taskId: Int, taskDao: TaskDao, navController: NavController) {
+    var task by remember { mutableStateOf<Task?>(null) }
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
-    var isTask by remember { mutableStateOf(false) }
-    var taskTime by remember { mutableStateOf("00:00") }
-    var taskDate by remember { mutableStateOf("") }
-
+    var date by remember { mutableStateOf("") }
+    var time by remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
 
     val context = LocalContext.current
     val calendar = Calendar.getInstance()
 
+    LaunchedEffect(taskId) {
+        taskDao.getAllTasks().collect { tasks ->
+            task = tasks.find { it.id == taskId }
+            task?.let {
+                title = it.title
+                description = it.description
+                date = it.date
+                time = it.time
+            }
+        }
+    }
+
     fun showTimePickerDialog() {
         TimePickerDialog(
             context,
             { _, hourOfDay, minute ->
-                taskTime = String.format("%02d:%02d", hourOfDay, minute)
+                time = String.format("%02d:%02d", hourOfDay, minute)
             },
             calendar.get(Calendar.HOUR_OF_DAY),
             calendar.get(Calendar.MINUTE),
@@ -50,7 +59,7 @@ fun CrearNotaScreen(noteDao: NoteDao, taskDao: TaskDao, navController: NavContro
         val datePickerDialog = DatePickerDialog(
             context,
             { _, year, monthOfYear, dayOfMonth ->
-                taskDate = "$dayOfMonth/${monthOfYear + 1}/$year"
+                date = "$dayOfMonth/${monthOfYear + 1}/$year"
             },
             calendar.get(Calendar.YEAR),
             calendar.get(Calendar.MONTH),
@@ -62,7 +71,7 @@ fun CrearNotaScreen(noteDao: NoteDao, taskDao: TaskDao, navController: NavContro
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Crear") },
+                title = { Text("Editar Tarea") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Regresar")
@@ -71,23 +80,17 @@ fun CrearNotaScreen(noteDao: NoteDao, taskDao: TaskDao, navController: NavContro
                 actions = {
                     IconButton(onClick = {
                         coroutineScope.launch {
-                            if (isTask) {
-                                val task = Task(
+                            task?.let {
+                                val updatedTask = it.copy(
                                     title = title,
                                     description = description,
-                                    date = taskDate,
-                                    time = taskTime
+                                    date = date,
+                                    time = time
                                 )
-                                taskDao.insertTask(task)
-                            } else {
-                                val note = Note(
-                                    title = title,
-                                    description = description,
-                                    type = com.example.proyectofinalweb.model.NoteType.NOTE
-                                )
-                                noteDao.insertNote(note)
+                                taskDao.updateTask(updatedTask)
+                                navController.popBackStack() // Go back to details screen
+                                navController.popBackStack() // Go back to home screen
                             }
-                            navController.popBackStack()
                         }
                     }) {
                         Icon(Icons.Default.Done, contentDescription = "Guardar")
@@ -96,63 +99,38 @@ fun CrearNotaScreen(noteDao: NoteDao, taskDao: TaskDao, navController: NavContro
             )
         }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(16.dp)
-        ) {
-            OutlinedTextField(
-                value = title,
-                onValueChange = { title = it },
-                label = { Text("Título") },
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            OutlinedTextField(
-                value = description,
-                onValueChange = { description = it },
-                label = { Text("Descripción") },
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            Text("Seleccionar Tipo:")
-            Row {
-                RadioButton(
-                    selected = !isTask,
-                    onClick = { isTask = false }
+        task?.let {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(16.dp)
+            ) {
+                OutlinedTextField(
+                    value = title,
+                    onValueChange = { title = it },
+                    label = { Text("Título") },
+                    modifier = Modifier.fillMaxWidth()
                 )
-                Text("Nota", modifier = Modifier.padding(start = 4.dp))
-
-                Spacer(modifier = Modifier.width(16.dp))
-
-                RadioButton(
-                    selected = isTask,
-                    onClick = { isTask = true }
+                Spacer(modifier = Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = description,
+                    onValueChange = { description = it },
+                    label = { Text("Descripción") },
+                    modifier = Modifier.fillMaxWidth()
                 )
-                Text("Tarea", modifier = Modifier.padding(start = 4.dp))
-            }
-
-            if (isTask) {
-                Spacer(modifier = Modifier.height(20.dp))
-
+                Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = if (taskDate.isEmpty()) "Selecciona la fecha" else taskDate,
+                    text = if (date.isEmpty()) "Selecciona la fecha" else date,
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable { showDatePickerDialog() }
                         .padding(16.dp),
                     style = MaterialTheme.typography.bodyMedium
                 )
-
                 Spacer(modifier = Modifier.height(10.dp))
-
                 Text(
-                    text = "Hora: $taskTime",
+                    text = "Hora: $time",
                     modifier = Modifier
                         .clickable { showTimePickerDialog() }
                         .padding(16.dp),
