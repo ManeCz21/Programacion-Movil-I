@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Colores principales -->
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#6200EE</color> <!-- Cambié el tono un poco más suave -->
+    <color name="purple_700">#3700B3</color>
+    <color name="teal_200">#03DAC5</color> <!-- Tono más brillante para la acentuación -->
+    <color name="teal_700">#018786</color>
+
+    <!-- Colores de fondo y texto -->
+    <color name="background">#FFFFFF</color> <!-- Fondo blanco para el tema claro -->
+    <color name="textColorPrimary">#000000</color> <!-- Texto principal oscuro para mejor contraste -->
+    <color name="textColorSecondary">#757575</color> <!-- Texto secundario gris oscuro -->
+
+    <!-- Colores para modo oscuro -->
+    <color name="backgroundDark">#121212</color> <!-- Fondo oscuro para el tema oscuro -->
+    <color name="textColorPrimaryDark">#FFFFFF</color> <!-- Texto blanco para mejor contraste en fondo oscuro -->
+    <color name="textColorSecondaryDark">#B0B0B0</color>
+</resources>
