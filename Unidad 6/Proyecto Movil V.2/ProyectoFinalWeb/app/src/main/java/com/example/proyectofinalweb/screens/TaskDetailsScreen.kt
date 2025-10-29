@@ -24,8 +24,13 @@ fun TaskDetailsScreen(
     navigateToEditTask: (Int) -> Unit,
     navigateBack: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: TaskDetailsViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    viewModel: TaskDetailsViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    taskId: Int? = null
 ) {
+    if (taskId != null) {
+        viewModel.setTaskId(taskId)
+    }
+
     val uiState by viewModel.uiState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     var showDeleteConfirmation by remember { mutableStateOf(false) }
@@ -37,15 +42,15 @@ fun TaskDetailsScreen(
                 title = { Text("Detalles de la Tarea") },
                 navigationIcon = {
                     IconButton(onClick = navigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Atrás")
+                        Icon(Icons.Filled.ArrowBack, contentDescription = "Atrás")
                     }
                 },
                 actions = {
                     IconButton(onClick = { navigateToEditTask(uiState.id) }) {
-                        Icon(Icons.Default.Edit, contentDescription = "Editar")
+                        Icon(Icons.Filled.Edit, contentDescription = "Editar")
                     }
                     IconButton(onClick = { showDeleteConfirmation = true }) {
-                        Icon(Icons.Default.Delete, contentDescription = "Eliminar")
+                        Icon(Icons.Filled.Delete, contentDescription = "Eliminar")
                     }
                 }
             )

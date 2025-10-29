@@ -1,5 +1,6 @@
 package com.example.proyectofinalweb.navigation
 
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -13,12 +14,21 @@ import com.example.proyectofinalweb.ui.note.NoteEntryDestination
 import com.example.proyectofinalweb.ui.task.TaskDetailsDestination
 import com.example.proyectofinalweb.ui.task.TaskEditDestination
 import com.example.proyectofinalweb.ui.task.TaskEntryDestination
+import com.example.proyectofinalweb.util.AppContentType
 
 @Composable
 fun AppNavHost(
     navController: NavHostController,
+    widthSizeClass: WindowWidthSizeClass,
     modifier: Modifier = Modifier,
 ) {
+    val contentType = when (widthSizeClass) {
+        WindowWidthSizeClass.Compact,
+        WindowWidthSizeClass.Medium -> AppContentType.LIST_ONLY
+        WindowWidthSizeClass.Expanded -> AppContentType.LIST_AND_DETAIL
+        else -> AppContentType.LIST_ONLY
+    }
+
     NavHost(
         navController = navController,
         startDestination = HomeDestination.route,
@@ -30,7 +40,10 @@ fun AppNavHost(
                 navigateToNoteEntry = { navController.navigate(NoteEntryDestination.route) },
                 navigateToTaskEntry = { navController.navigate(TaskEntryDestination.route) },
                 navigateToNoteUpdate = { navController.navigate("${NoteDetailsDestination.route}/$it") },
-                navigateToTaskUpdate = { navController.navigate("${TaskDetailsDestination.route}/$it") }
+                navigateToTaskUpdate = { navController.navigate("${TaskDetailsDestination.route}/$it") },
+                navigateToEditNote = { navController.navigate("${NoteEditDestination.route}/$it") },
+                navigateToEditTask = { navController.navigate("${TaskEditDestination.route}/$it") },
+                contentType = contentType
             )
         }
         composable(route = NoteEntryDestination.route) {

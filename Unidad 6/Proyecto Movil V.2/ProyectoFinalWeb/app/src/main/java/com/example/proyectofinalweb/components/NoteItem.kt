@@ -39,7 +39,7 @@ fun NoteItem(note: Note, onClick: () -> Unit) {
             }
             if (note.type == NoteType.TASK) {
                 Icon(
-                    imageVector = Icons.Default.CheckCircle,
+                    imageVector = Icons.Filled.CheckCircle,
                     contentDescription = "Task"
                 )
             }

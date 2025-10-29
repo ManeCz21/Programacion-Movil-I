@@ -22,8 +22,13 @@ fun NoteDetailsScreen(
     navigateToEditNote: (Int) -> Unit,
     navigateBack: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: NoteDetailsViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    viewModel: NoteDetailsViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    noteId: Int? = null
 ) {
+    if (noteId != null) {
+        viewModel.setNoteId(noteId)
+    }
+
     val uiState by viewModel.uiState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     var showDeleteConfirmation by remember { mutableStateOf(false) }
@@ -35,15 +40,15 @@ fun NoteDetailsScreen(
                 title = { Text("Detalles de la Nota") },
                 navigationIcon = {
                     IconButton(onClick = navigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Atrás")
+                        Icon(Icons.Filled.ArrowBack, contentDescription = "Atrás")
                     }
                 },
                 actions = {
                     IconButton(onClick = { navigateToEditNote(uiState.id) }) {
-                        Icon(Icons.Default.Edit, contentDescription = "Editar")
+                        Icon(Icons.Filled.Edit, contentDescription = "Editar")
                     }
                     IconButton(onClick = { showDeleteConfirmation = true }) {
-                        Icon(Icons.Default.Delete, contentDescription = "Eliminar")
+                        Icon(Icons.Filled.Delete, contentDescription = "Eliminar")
                     }
                 }
             )
