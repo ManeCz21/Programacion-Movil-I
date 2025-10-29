@@ -1,4 +1,3 @@
-
 package com.example.proyectofinalweb.db
 
 import androidx.room.Dao
@@ -11,8 +10,11 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface NoteDao {
-    @Query("SELECT * FROM note")
+    @Query("SELECT * FROM note ORDER BY id DESC")
     fun getAllNotes(): Flow<List<Note>>
+
+    @Query("SELECT * from note WHERE id = :id")
+    fun getNote(id: Int): Flow<Note?>
 
     @Insert
     suspend fun insertNote(note: Note)

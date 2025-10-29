@@ -10,8 +10,11 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface TaskDao {
-    @Query("SELECT * FROM tasks")
+    @Query("SELECT * FROM tasks ORDER BY id DESC")
     fun getAllTasks(): Flow<List<Task>>
+
+    @Query("SELECT * from tasks WHERE id = :id")
+    fun getTask(id: Int): Flow<Task?>
 
     @Insert
     suspend fun insertTask(task: Task)

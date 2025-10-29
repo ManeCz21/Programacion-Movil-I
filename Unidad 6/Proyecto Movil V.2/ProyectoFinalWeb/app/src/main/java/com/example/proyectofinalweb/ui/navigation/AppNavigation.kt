@@ -1,30 +1,63 @@
-package com.example.proyectofinalweb.navigation
+package com.example.proyectofinalweb.ui.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.example.proyectofinalweb.screens.* // Import all screens
-import com.example.proyectofinalweb.ui.home.HomeDestination
-import com.example.proyectofinalweb.ui.note.NoteDetailsDestination
-import com.example.proyectofinalweb.ui.note.NoteEditDestination
-import com.example.proyectofinalweb.ui.note.NoteEntryDestination
-import com.example.proyectofinalweb.ui.task.TaskDetailsDestination
-import com.example.proyectofinalweb.ui.task.TaskEditDestination
-import com.example.proyectofinalweb.ui.task.TaskEntryDestination
+import androidx.navigation.navArgument
+import com.example.proyectofinalweb.screens.*
 
+// 2. Definición de todos los destinos de la app
+object HomeDestination : NavigationDestination {
+    override val route = "home"
+}
+
+object NoteEntryDestination : NavigationDestination {
+    override val route = "note_entry"
+}
+
+object NoteDetailsDestination : NavigationDestination {
+    override val route = "note_details"
+    const val NOTE_ID_ARG = "noteId"
+    val routeWithArgs = "$route/{$NOTE_ID_ARG}"
+    val arguments = listOf(navArgument(NOTE_ID_ARG) { type = NavType.IntType })
+}
+
+object NoteEditDestination : NavigationDestination {
+    override val route = "note_edit"
+    const val NOTE_ID_ARG = "noteId"
+    val routeWithArgs = "$route/{$NOTE_ID_ARG}"
+    val arguments = listOf(navArgument(NOTE_ID_ARG) { type = NavType.IntType })
+}
+
+object TaskEntryDestination : NavigationDestination {
+    override val route = "task_entry"
+}
+
+object TaskDetailsDestination : NavigationDestination {
+    override val route = "task_details"
+    const val TASK_ID_ARG = "taskId"
+    val routeWithArgs = "$route/{$TASK_ID_ARG}"
+    val arguments = listOf(navArgument(TASK_ID_ARG) { type = NavType.IntType })
+}
+
+object TaskEditDestination : NavigationDestination {
+    override val route = "task_edit"
+    const val TASK_ID_ARG = "taskId"
+    val routeWithArgs = "$route/{$TASK_ID_ARG}"
+    val arguments = listOf(navArgument(TASK_ID_ARG) { type = NavType.IntType })
+}
+
+// 3. El NavHost que usa los destinos para configurar la navegación
 @Composable
 fun AppNavHost(
-    navController: NavHostController,
-    modifier: Modifier = Modifier,
+    navController: NavHostController
 ) {
     NavHost(
         navController = navController,
-        startDestination = HomeDestination.route,
-        modifier = modifier
+        startDestination = HomeDestination.route
     ) {
-        // Notes
         composable(route = HomeDestination.route) {
             HomeScreen(
                 navigateToNoteEntry = { navController.navigate(NoteEntryDestination.route) },
@@ -51,8 +84,6 @@ fun AppNavHost(
         ) {
             NoteEditScreen(navigateBack = { navController.popBackStack() })
         }
-
-        // Tasks
         composable(route = TaskEntryDestination.route) {
             TaskEntryScreen(navigateBack = { navController.popBackStack() })
         }
