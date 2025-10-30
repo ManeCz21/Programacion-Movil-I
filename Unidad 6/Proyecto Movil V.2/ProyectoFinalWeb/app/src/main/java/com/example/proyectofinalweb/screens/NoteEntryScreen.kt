@@ -11,8 +11,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.proyectofinalweb.R
 import com.example.proyectofinalweb.ui.AppViewModelProvider
 import com.example.proyectofinalweb.ui.note.NoteEntryViewModel
 import com.example.proyectofinalweb.ui.note.NoteUiState
@@ -30,10 +32,10 @@ fun NoteEntryScreen(
         modifier = modifier,
         topBar = {
             TopAppBar(
-                title = { Text("Crear Nota") },
+                title = { Text(stringResource(R.string.create_note)) },
                 navigationIcon = {
                     IconButton(onClick = navigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Atrás")
+                        Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.back_button))
                     }
                 },
                 actions = {
@@ -43,7 +45,7 @@ fun NoteEntryScreen(
                             navigateBack()
                         }
                     }) {
-                        Icon(Icons.Default.Done, contentDescription = "Guardar")
+                        Icon(Icons.Filled.Done, contentDescription = stringResource(R.string.save_button))
                     }
                 }
             )
@@ -70,14 +72,14 @@ fun NoteEntryBody(
         OutlinedTextField(
             value = noteUiState.title,
             onValueChange = { onNoteValueChange(noteUiState.copy(title = it)) },
-            label = { Text("Título") },
+            label = { Text(stringResource(R.string.title_label)) },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true
         )
         OutlinedTextField(
             value = noteUiState.description,
             onValueChange = { onNoteValueChange(noteUiState.copy(description = it)) },
-            label = { Text("Descripción") },
+            label = { Text(stringResource(R.string.description_label)) },
             modifier = Modifier.fillMaxWidth()
         )
     }

@@ -13,8 +13,10 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.proyectofinalweb.R
 import com.example.proyectofinalweb.components.NoteItem
 import com.example.proyectofinalweb.components.TaskItem
 import com.example.proyectofinalweb.model.Task
@@ -103,7 +105,7 @@ private fun HomeContent(
     Scaffold(
         modifier = modifier,
         topBar = {
-            TopAppBar(title = { Text("Notas y Tareas") })
+            TopAppBar(title = { Text(stringResource(R.string.home_title)) })
         },
         floatingActionButton = {
             Box {
@@ -111,21 +113,21 @@ private fun HomeContent(
                     onClick = { showMenu = !showMenu },
                     containerColor = MaterialTheme.colorScheme.primary,
                 ) {
-                    Icon(Icons.Filled.Add, contentDescription = "Agregar")
+                    Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.add_button_description))
                 }
                 DropdownMenu(
                     expanded = showMenu,
                     onDismissRequest = { showMenu = false }
                 ) {
                     DropdownMenuItem(
-                        text = { Text("Crear Nota") },
+                        text = { Text(stringResource(R.string.create_note)) },
                         onClick = {
                             showMenu = false
                             navigateToNoteEntry()
                         }
                     )
                     DropdownMenuItem(
-                        text = { Text("Crear Tarea") },
+                        text = { Text(stringResource(R.string.create_task)) },
                         onClick = {
                             showMenu = false
                             navigateToTaskEntry()
@@ -139,9 +141,9 @@ private fun HomeContent(
             contentPadding = paddingValues,
             modifier = Modifier.fillMaxSize()
         ) {
-            stickyHeader { Text("Tareas", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(16.dp)) }
+            stickyHeader { Text(stringResource(R.string.tasks_header), style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(16.dp)) }
             if (homeUiState.taskList.isEmpty()) {
-                item { Text(text = "No hay tareas.", modifier = Modifier.padding(16.dp)) }
+                item { Text(text = stringResource(R.string.no_tasks), modifier = Modifier.padding(16.dp)) }
             } else {
                 items(homeUiState.taskList) { task ->
                     TaskItem(
@@ -152,9 +154,9 @@ private fun HomeContent(
                 }
             }
 
-            stickyHeader { Text("Notas", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(16.dp)) }
+            stickyHeader { Text(stringResource(R.string.notes_header), style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(16.dp)) }
             if (homeUiState.noteList.isEmpty()) {
-                item { Text(text = "No hay notas.", modifier = Modifier.padding(16.dp)) }
+                item { Text(text = stringResource(R.string.no_notes), modifier = Modifier.padding(16.dp)) }
             } else {
                 items(homeUiState.noteList) { note ->
                     NoteItem(note = note, onClick = { onNoteClick(note.id) })

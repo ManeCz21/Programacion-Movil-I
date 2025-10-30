@@ -8,7 +8,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.proyectofinalweb.R
 import com.example.proyectofinalweb.ui.AppViewModelProvider
 import com.example.proyectofinalweb.ui.note.NoteEditViewModel
 import kotlinx.coroutines.launch
@@ -25,10 +27,10 @@ fun NoteEditScreen(
         modifier = modifier,
         topBar = {
             TopAppBar(
-                title = { Text("Editar Nota") },
+                title = { Text(stringResource(R.string.edit_note_title)) },
                 navigationIcon = {
                     IconButton(onClick = navigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Atrás")
+                        Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.back_button))
                     }
                 },
                 actions = {
@@ -38,7 +40,7 @@ fun NoteEditScreen(
                             navigateBack()
                         }
                     }) {
-                        Icon(Icons.Default.Done, contentDescription = "Guardar")
+                        Icon(Icons.Filled.Done, contentDescription = stringResource(R.string.save_button))
                     }
                 }
             )

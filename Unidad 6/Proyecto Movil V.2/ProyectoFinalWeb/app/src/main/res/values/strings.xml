@@ -1,5 +1,36 @@
 <resources>
     <string name="app_name">ProyectoFinalWeb</string>
-    android:theme="@style/Theme.ProyectoFinalWeb">
+    <string name="home_title">Notas y Tareas</string>
+    <string name="add_button_description">Agregar</string>
+    <string name="create_note">Crear Nota</string>
+    <string name="create_task">Crear Tarea</string>
+    <string name="tasks_header">Tareas</string>
+    <string name="no_tasks">No hay tareas.</string>
+    <string name="notes_header">Notas</string>
+    <string name="no_notes">No hay notas.</string>
 
+    <!-- Note/Task Entry/Edit -->
+    <string name="back_button">Atrás</string>
+    <string name="save_button">Guardar</string>
+    <string name="title_label">Título</string>
+    <string name="description_label">Descripción</string>
+    <string name="select_date">Selecciona la fecha</string>
+    <string name="select_time">Selecciona la hora</string>
+    <string name="edit_note_title">Editar Nota</string>
+    <string name="edit_task_title">Editar Tarea</string>
+
+    <!-- Details -->
+    <string name="note_details_title">Detalles de la Nota</string>
+    <string name="task_details_title">Detalles de la Tarea</string>
+    <string name="edit_button">Editar</string>
+    <string name="delete_button">Eliminar</string>
+    <string name="delete_confirmation_title">Confirmar eliminación</string>
+    <string name="delete_note_confirmation_message">¿Estás seguro de que quieres eliminar esta nota?</string>
+    <string name="delete_task_confirmation_message">¿Estás seguro de que quieres eliminar esta tarea?</string>
+    <string name="cancel_button">Cancelar</string>
+    <string name="date_label">Fecha</string>
+    <string name="time_label">Hora</string>
+    <string name="status_label">Estado</string>
+    <string name="status_completed">Completada</string>
+    <string name="status_pending">Pendiente</string>
 </resources>

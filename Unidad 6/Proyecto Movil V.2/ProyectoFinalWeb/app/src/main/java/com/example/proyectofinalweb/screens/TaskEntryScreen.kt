@@ -12,8 +12,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.proyectofinalweb.R
 import com.example.proyectofinalweb.ui.AppViewModelProvider
 import com.example.proyectofinalweb.ui.task.TaskEntryViewModel
 import com.example.proyectofinalweb.ui.task.TaskUiState
@@ -32,10 +34,10 @@ fun TaskEntryScreen(
         modifier = modifier,
         topBar = {
             TopAppBar(
-                title = { Text("Crear Tarea") },
+                title = { Text(stringResource(R.string.create_task)) },
                 navigationIcon = {
                     IconButton(onClick = navigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Atrás")
+                        Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.back_button))
                     }
                 },
                 actions = {
@@ -45,7 +47,7 @@ fun TaskEntryScreen(
                             navigateBack()
                         }
                     }) {
-                        Icon(Icons.Default.Done, contentDescription = "Guardar")
+                        Icon(Icons.Filled.Done, contentDescription = stringResource(R.string.save_button))
                     }
                 }
             )
@@ -95,22 +97,22 @@ fun TaskEntryBody(
         OutlinedTextField(
             value = taskUiState.title,
             onValueChange = { onTaskValueChange(taskUiState.copy(title = it)) },
-            label = { Text("Título") },
+            label = { Text(stringResource(R.string.title_label)) },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true
         )
         OutlinedTextField(
             value = taskUiState.description,
             onValueChange = { onTaskValueChange(taskUiState.copy(description = it)) },
-            label = { Text("Descripción") },
+            label = { Text(stringResource(R.string.description_label)) },
             modifier = Modifier.fillMaxWidth()
         )
         Text(
-            text = if (taskUiState.date.isEmpty()) "Selecciona la fecha" else taskUiState.date,
+            text = if (taskUiState.date.isEmpty()) stringResource(R.string.select_date) else taskUiState.date,
             modifier = Modifier.fillMaxWidth().clickable { showDatePickerDialog() }
         )
         Text(
-            text = if (taskUiState.time.isEmpty()) "Selecciona la hora" else taskUiState.time,
+            text = if (taskUiState.time.isEmpty()) stringResource(R.string.select_time) else taskUiState.time,
             modifier = Modifier.fillMaxWidth().clickable { showTimePickerDialog() }
         )
     }
