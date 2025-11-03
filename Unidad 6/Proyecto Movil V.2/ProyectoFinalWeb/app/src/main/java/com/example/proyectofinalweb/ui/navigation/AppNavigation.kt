@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.proyectofinalweb.screens.*
+import com.example.proyectofinalweb.util.AppContentType
 
 // 2. Definición de todos los destinos de la app
 object HomeDestination : NavigationDestination {
@@ -52,7 +53,8 @@ object TaskEditDestination : NavigationDestination {
 // 3. El NavHost que usa los destinos para configurar la navegación
 @Composable
 fun AppNavHost(
-    navController: NavHostController
+    navController: NavHostController,
+    contentType: AppContentType
 ) {
     NavHost(
         navController = navController,
@@ -63,7 +65,10 @@ fun AppNavHost(
                 navigateToNoteEntry = { navController.navigate(NoteEntryDestination.route) },
                 navigateToTaskEntry = { navController.navigate(TaskEntryDestination.route) },
                 navigateToNoteUpdate = { navController.navigate("${NoteDetailsDestination.route}/$it") },
-                navigateToTaskUpdate = { navController.navigate("${TaskDetailsDestination.route}/$it") }
+                navigateToTaskUpdate = { navController.navigate("${TaskDetailsDestination.route}/$it") },
+                navigateToEditNote = { navController.navigate("${NoteEditDestination.route}/$it") },
+                navigateToEditTask = { navController.navigate("${TaskEditDestination.route}/$it") },
+                contentType = contentType
             )
         }
         composable(route = NoteEntryDestination.route) {
