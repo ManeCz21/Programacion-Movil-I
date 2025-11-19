@@ -12,6 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -68,6 +69,16 @@ fun HomeScreen(
                         navigateBack = { viewModel.closeDetailScreen() },
                         taskId = homeUiState.selectedTask!!.id
                     )
+                } else {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = stringResource(R.string.select_message),
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    }
                 }
                 BackHandler {
                     viewModel.closeDetailScreen()
