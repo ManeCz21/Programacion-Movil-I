@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">ProyectoFinalWeb</string>
+    <string name="app_name">Notes Task App</string>
     <string name="home_title">Notes and Tasks</string>
     <string name="add_button_description">Add</string>
     <string name="create_note">Create Note</string>
