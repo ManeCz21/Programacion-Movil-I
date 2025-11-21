@@ -25,6 +25,9 @@
     <string name="record_audio">Grabar audio</string>
     <string name="attachments_header">Archivos adjuntos</string>
     <string name="no_attachments">No hay archivos adjuntos.</string>
+    <string name="stop_recording">Detener grabación</string>
+    <string name="play_audio">Reproducir audio</string>
+    <string name="stop_playing">Detener reproducción</string>
 
     <!-- Details -->
     <string name="note_details_title">Detalles de la Nota</string>

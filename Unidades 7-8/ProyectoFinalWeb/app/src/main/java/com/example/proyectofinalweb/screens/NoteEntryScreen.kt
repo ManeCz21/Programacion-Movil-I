@@ -1,6 +1,7 @@
 package com.example.proyectofinalweb.screens
 
 import android.Manifest
+import android.media.MediaRecorder
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -84,18 +85,21 @@ fun NoteEntryBody(
     val context = LocalContext.current
     val authority = "${context.packageName}.provider"
 
+    var mediaRecorder by remember { mutableStateOf<MediaRecorder?>(null) }
+    var audioFile by remember { mutableStateOf<File?>(null) }
+    var isRecording by remember { mutableStateOf(false) }
+
     val permissionsState = rememberMultiplePermissionsState(
         permissions = listOf(
             Manifest.permission.CAMERA,
-            Manifest.permission.RECORD_AUDIO,
-            Manifest.permission.READ_EXTERNAL_STORAGE
+            Manifest.permission.RECORD_AUDIO
         )
     )
 
-    fun getUri(): Uri {
+    fun getUri(filePrefix: String, fileSuffix: String): Uri {
         val file = File.createTempFile(
-            "temp_image",
-            ".jpg",
+            filePrefix,
+            fileSuffix,
             context.externalCacheDir
         )
         return FileProvider.getUriForFile(
@@ -109,7 +113,7 @@ fun NoteEntryBody(
         contract = ActivityResultContracts.TakePicture()
     ) { success ->
         if (success) {
-            val uri = getUri()
+            val uri = getUri("temp_image", ".jpg")
             val newAttachments = noteUiState.attachments.toMutableList().apply {
                 add(Attachment(uri.toString(), AttachmentType.IMAGE))
             }
@@ -121,17 +125,13 @@ fun NoteEntryBody(
         contract = ActivityResultContracts.CaptureVideo()
     ) { success ->
         if (success) {
-            val uri = getUri()
+            val uri = getUri("temp_video", ".mp4")
             val newAttachments = noteUiState.attachments.toMutableList().apply {
                 add(Attachment(uri.toString(), AttachmentType.VIDEO))
             }
             onNoteValueChange(noteUiState.copy(attachments = newAttachments))
         }
     }
-
-    val recordAudioLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult() // Using generic contract for audio
-    ) { /* TODO: handle audio result */ }
 
     val selectFileLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -173,40 +173,63 @@ fun NoteEntryBody(
                     text = { Text(stringResource(R.string.capture_image)) },
                     onClick = {
                         if (permissionsState.permissions[0].status.isGranted) {
-                            takePictureLauncher.launch(getUri())
+                            takePictureLauncher.launch(getUri("temp_image", ".jpg"))
                         } else {
                             permissionsState.launchMultiplePermissionRequest()
                         }
+                        showMenu = false
                     }
                 )
                 DropdownMenuItem(
                     text = { Text(stringResource(R.string.record_video)) },
                     onClick = {
-                        if (permissionsState.permissions[0].status.isGranted && permissionsState.permissions[1].status.isGranted) {
-                            recordVideoLauncher.launch(getUri())
+                        if (permissionsState.permissions.all { it.status.isGranted }) {
+                            recordVideoLauncher.launch(getUri("temp_video", ".mp4"))
                         } else {
                             permissionsState.launchMultiplePermissionRequest()
                         }
+                        showMenu = false
                     }
                 )
                 DropdownMenuItem(
-                    text = { Text(stringResource(R.string.record_audio)) },
+                    text = { Text(if (isRecording) stringResource(R.string.stop_recording) else stringResource(R.string.record_audio)) },
                     onClick = {
-                        if (permissionsState.permissions[1].status.isGranted) {
-                            // TODO: launch audio recorder
+                         if (isRecording) {
+                            mediaRecorder?.stop()
+                            mediaRecorder?.release()
+                            mediaRecorder = null
+                            isRecording = false
+                            audioFile?.let { 
+                                val newAttachments = noteUiState.attachments.toMutableList().apply {
+                                    add(Attachment(it.toURI().toString(), AttachmentType.AUDIO))
+                                }
+                                onNoteValueChange(noteUiState.copy(attachments = newAttachments))
+                            }
                         } else {
-                            permissionsState.launchMultiplePermissionRequest()
+                            if (permissionsState.permissions[1].status.isGranted) {
+                                val file = File(context.cacheDir, "audio.mp3")
+                                audioFile = file
+                                mediaRecorder = MediaRecorder(context).apply {
+                                    setAudioSource(MediaRecorder.AudioSource.MIC)
+                                    setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
+                                    setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
+                                    setOutputFile(file.absolutePath)
+                                    prepare()
+                                    start()
+                                }
+                                isRecording = true
+                            } else {
+                                permissionsState.launchMultiplePermissionRequest()
+                            }
                         }
+                        showMenu = false
                     }
                 )
                 DropdownMenuItem(
                     text = { Text(stringResource(R.string.attach_file)) },
                     onClick = {
-                        if (permissionsState.permissions[2].status.isGranted) {
-                            selectFileLauncher.launch("*/*")
-                        } else {
-                            permissionsState.launchMultiplePermissionRequest()
-                        }
+                        selectFileLauncher.launch("*/*")
+                        showMenu = false
                     }
                 )
             }
