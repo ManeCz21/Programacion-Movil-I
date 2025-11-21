@@ -16,14 +16,25 @@ class TaskEditViewModel(
     private val tasksRepository: TasksRepository
 ) : ViewModel() {
 
-    private val taskId: Int = checkNotNull(savedStateHandle[TaskEditDestination.TASK_ID_ARG])
-
     var taskUiState by mutableStateOf(TaskUiState())
         private set
 
+    private var taskId: Int? = savedStateHandle[TaskEditDestination.TASK_ID_ARG]
+
     init {
+        taskId?.let { loadTask(it) }
+    }
+
+    fun initialize(id: Int) {
+        if (taskId == null || taskId != id) {
+            taskId = id
+            loadTask(id)
+        }
+    }
+
+    private fun loadTask(id: Int) {
         viewModelScope.launch {
-            taskUiState = tasksRepository.getTaskStream(taskId)
+            taskUiState = tasksRepository.getTaskStream(id)
                 .filterNotNull()
                 .first()
                 .toTaskUiState()

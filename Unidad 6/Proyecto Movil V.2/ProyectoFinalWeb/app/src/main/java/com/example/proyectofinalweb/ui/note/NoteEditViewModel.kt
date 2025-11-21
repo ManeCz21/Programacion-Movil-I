@@ -16,14 +16,25 @@ class NoteEditViewModel(
     private val notesRepository: NotesRepository
 ) : ViewModel() {
 
-    private val noteId: Int = checkNotNull(savedStateHandle[NoteEditDestination.NOTE_ID_ARG])
-
     var noteUiState by mutableStateOf(NoteUiState())
         private set
 
+    private var noteId: Int? = savedStateHandle[NoteEditDestination.NOTE_ID_ARG]
+
     init {
+        noteId?.let { loadNote(it) }
+    }
+
+    fun initialize(id: Int) {
+        if (noteId == null || noteId != id) {
+            noteId = id
+            loadNote(id)
+        }
+    }
+
+    private fun loadNote(id: Int) {
         viewModelScope.launch {
-            noteUiState = notesRepository.getNoteStream(noteId)
+            noteUiState = notesRepository.getNoteStream(id)
                 .filterNotNull()
                 .first()
                 .toNoteUiState()

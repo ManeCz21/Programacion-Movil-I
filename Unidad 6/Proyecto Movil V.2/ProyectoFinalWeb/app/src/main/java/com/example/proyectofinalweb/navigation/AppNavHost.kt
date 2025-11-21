@@ -6,7 +6,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.example.proyectofinalweb.screens.* // Import all screens
+import com.example.proyectofinalweb.screens.*
 import com.example.proyectofinalweb.ui.home.HomeDestination
 import com.example.proyectofinalweb.ui.note.NoteDetailsDestination
 import com.example.proyectofinalweb.ui.note.NoteEditDestination
@@ -41,8 +41,6 @@ fun AppNavHost(
                 navigateToTaskEntry = { navController.navigate(TaskEntryDestination.route) },
                 navigateToNoteUpdate = { navController.navigate("${NoteDetailsDestination.route}/$it") },
                 navigateToTaskUpdate = { navController.navigate("${TaskDetailsDestination.route}/$it") },
-                navigateToEditNote = { navController.navigate("${NoteEditDestination.route}/$it") },
-                navigateToEditTask = { navController.navigate("${TaskEditDestination.route}/$it") },
                 contentType = contentType
             )
         }

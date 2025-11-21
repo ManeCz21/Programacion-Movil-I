@@ -29,7 +29,9 @@ class HomeViewModel(
             noteList = notes,
             taskList = tasks,
             selectedNote = notes.find { it.id == selection.selectedNoteId },
-            selectedTask = tasks.find { it.id == selection.selectedTaskId }
+            selectedTask = tasks.find { it.id == selection.selectedTaskId },
+            isEditingNote = selection.isEditingNote,
+            isEditingTask = selection.isEditingTask
         )
     }.stateIn(
         scope = viewModelScope,
@@ -42,21 +44,35 @@ class HomeViewModel(
     }
 
     fun setSelectedNote(noteId: Int) {
-        _selectionState.update { it.copy(selectedNoteId = noteId, selectedTaskId = null) }
+        _selectionState.update { it.copy(selectedNoteId = noteId, selectedTaskId = null, isEditingNote = false, isEditingTask = false) }
     }
 
     fun setSelectedTask(taskId: Int) {
-        _selectionState.update { it.copy(selectedNoteId = null, selectedTaskId = taskId) }
+        _selectionState.update { it.copy(selectedNoteId = null, selectedTaskId = taskId, isEditingNote = false, isEditingTask = false) }
     }
 
     fun closeDetailScreen() {
         _selectionState.update { SelectionState() }
+    }
+
+    fun onEditNote() {
+        _selectionState.update { it.copy(isEditingNote = true) }
+    }
+
+    fun onEditTask() {
+        _selectionState.update { it.copy(isEditingTask = true) }
+    }
+
+    fun onBackFromEdit() {
+        _selectionState.update { it.copy(isEditingNote = false, isEditingTask = false) }
     }
 }
 
 private data class SelectionState(
     val selectedNoteId: Int? = null,
     val selectedTaskId: Int? = null,
+    val isEditingNote: Boolean = false,
+    val isEditingTask: Boolean = false
 )
 
 data class HomeUiState(
@@ -64,4 +80,6 @@ data class HomeUiState(
     val taskList: List<Task> = listOf(),
     val selectedNote: Note? = null,
     val selectedTask: Task? = null,
+    val isEditingNote: Boolean = false,
+    val isEditingTask: Boolean = false
 )

@@ -2,10 +2,11 @@ package com.example.proyectofinalweb.screens
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -20,9 +21,15 @@ import kotlinx.coroutines.launch
 fun TaskEditScreen(
     navigateBack: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: TaskEditViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    viewModel: TaskEditViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    taskId: Int? = null // Add taskId parameter
 ) {
     val coroutineScope = rememberCoroutineScope()
+
+    LaunchedEffect(taskId) {
+        taskId?.let { viewModel.initialize(it) }
+    }
+
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -30,7 +37,7 @@ fun TaskEditScreen(
                 title = { Text(stringResource(R.string.edit_task_title)) },
                 navigationIcon = {
                     IconButton(onClick = navigateBack) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.back_button))
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back_button))
                     }
                 },
                 actions = {

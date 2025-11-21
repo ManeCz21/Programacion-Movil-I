@@ -33,8 +33,6 @@ fun HomeScreen(
     navigateToTaskEntry: () -> Unit,
     navigateToNoteUpdate: (Int) -> Unit,
     navigateToTaskUpdate: (Int) -> Unit,
-    navigateToEditNote: (Int) -> Unit, // Add this
-    navigateToEditTask: (Int) -> Unit, // Add this
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = viewModel(factory = AppViewModelProvider.Factory),
     contentType: AppContentType
@@ -57,15 +55,25 @@ fun HomeScreen(
                 )
             }
             Box(modifier = Modifier.weight(1f)) {
-                if (homeUiState.selectedNote != null) {
+                if (homeUiState.isEditingNote && homeUiState.selectedNote != null) {
+                    NoteEditScreen(
+                        navigateBack = { viewModel.onBackFromEdit() },
+                        noteId = homeUiState.selectedNote!!.id
+                    )
+                } else if (homeUiState.isEditingTask && homeUiState.selectedTask != null) {
+                    TaskEditScreen(
+                        navigateBack = { viewModel.onBackFromEdit() },
+                        taskId = homeUiState.selectedTask!!.id
+                    )
+                } else if (homeUiState.selectedNote != null) {
                     NoteDetailsScreen(
-                        navigateToEditNote = navigateToEditNote,
+                        navigateToEditNote = { viewModel.onEditNote() },
                         navigateBack = { viewModel.closeDetailScreen() },
                         noteId = homeUiState.selectedNote!!.id
                     )
                 } else if (homeUiState.selectedTask != null) {
                     TaskDetailsScreen(
-                        navigateToEditTask = navigateToEditTask,
+                        navigateToEditTask = { viewModel.onEditTask() },
                         navigateBack = { viewModel.closeDetailScreen() },
                         taskId = homeUiState.selectedTask!!.id
                     )
@@ -81,7 +89,11 @@ fun HomeScreen(
                     }
                 }
                 BackHandler {
-                    viewModel.closeDetailScreen()
+                    if (homeUiState.isEditingNote || homeUiState.isEditingTask) {
+                        viewModel.onBackFromEdit()
+                    } else {
+                        viewModel.closeDetailScreen()
+                    }
                 }
             }
         }

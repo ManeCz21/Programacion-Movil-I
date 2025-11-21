@@ -66,8 +66,6 @@ fun AppNavHost(
                 navigateToTaskEntry = { navController.navigate(TaskEntryDestination.route) },
                 navigateToNoteUpdate = { navController.navigate("${NoteDetailsDestination.route}/$it") },
                 navigateToTaskUpdate = { navController.navigate("${TaskDetailsDestination.route}/$it") },
-                navigateToEditNote = { navController.navigate("${NoteEditDestination.route}/$it") },
-                navigateToEditTask = { navController.navigate("${TaskEditDestination.route}/$it") },
                 contentType = contentType
             )
         }
