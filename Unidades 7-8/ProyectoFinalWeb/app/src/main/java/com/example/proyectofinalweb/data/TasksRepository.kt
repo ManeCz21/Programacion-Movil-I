@@ -10,6 +10,7 @@ interface TasksRepository {
     suspend fun insertTask(task: Task)
     suspend fun deleteTask(task: Task)
     suspend fun updateTask(task: Task)
+    fun searchTasksStream(query: String): Flow<List<Task>>
 }
 
 class OfflineTasksRepository(private val taskDao: TaskDao) : TasksRepository {
@@ -18,4 +19,5 @@ class OfflineTasksRepository(private val taskDao: TaskDao) : TasksRepository {
     override suspend fun insertTask(task: Task) = taskDao.insertTask(task)
     override suspend fun deleteTask(task: Task) = taskDao.deleteTask(task)
     override suspend fun updateTask(task: Task) = taskDao.updateTask(task)
+    override fun searchTasksStream(query: String): Flow<List<Task>> = taskDao.searchTasks(query)
 }

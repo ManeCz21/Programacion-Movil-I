@@ -1,6 +1,5 @@
 package com.example.proyectofinalweb.ui.task
 
-import com.example.proyectofinalweb.model.Attachment
 import com.example.proyectofinalweb.model.Task
 
 data class TaskUiState(
@@ -9,8 +8,7 @@ data class TaskUiState(
     val description: String = "",
     val date: String = "",
     val time: String = "",
-    val isCompleted: Boolean = false,
-    val attachments: List<Attachment> = emptyList()
+    val isCompleted: Boolean = false
 ) {
     fun toTask(): Task = Task(
         id = id,
@@ -18,8 +16,7 @@ data class TaskUiState(
         description = description,
         date = date,
         time = time,
-        isCompleted = isCompleted,
-        attachments = attachments
+        isCompleted = isCompleted
     )
 }
 
@@ -29,6 +26,5 @@ fun Task.toTaskUiState(): TaskUiState = TaskUiState(
     description = description,
     date = date,
     time = time,
-    isCompleted = isCompleted,
-    attachments = attachments
+    isCompleted = isCompleted
 )

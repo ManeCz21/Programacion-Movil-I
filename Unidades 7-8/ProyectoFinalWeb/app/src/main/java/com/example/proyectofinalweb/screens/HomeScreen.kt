@@ -3,8 +3,10 @@ package com.example.proyectofinalweb.screens
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -39,6 +41,7 @@ fun HomeScreen(
 ) {
     val homeUiState by viewModel.homeUiState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
+    val searchQuery by viewModel.searchQuery.collectAsState()
 
     if (contentType == AppContentType.LIST_AND_DETAIL) {
         Row(modifier = modifier.fillMaxSize()) {
@@ -51,7 +54,9 @@ fun HomeScreen(
                     onTaskClick = { viewModel.setSelectedTask(it) },
                     onTaskCompletedChange = { task, completed ->
                         coroutineScope.launch { viewModel.completeTask(task, completed) }
-                    }
+                    },
+                    searchQuery = searchQuery,
+                    onSearchQueryChange = viewModel::onSearchQueryChange
                 )
             }
             Box(modifier = Modifier.weight(1f)) {
@@ -107,7 +112,9 @@ fun HomeScreen(
             onTaskCompletedChange = { task, completed ->
                 coroutineScope.launch { viewModel.completeTask(task, completed) }
             },
-            modifier = modifier
+            modifier = modifier,
+            searchQuery = searchQuery,
+            onSearchQueryChange = viewModel::onSearchQueryChange
         )
     }
 }
@@ -121,6 +128,8 @@ private fun HomeContent(
     onNoteClick: (Int) -> Unit,
     onTaskClick: (Int) -> Unit,
     onTaskCompletedChange: (Task, Boolean) -> Unit,
+    searchQuery: String,
+    onSearchQueryChange: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var showMenu by remember { mutableStateOf(false) }
@@ -143,46 +152,56 @@ private fun HomeContent(
                     onDismissRequest = { showMenu = false }
                 ) {
                     DropdownMenuItem(
-                        text = { Text(stringResource(R.string.create_note)) },
-                        onClick = {
-                            showMenu = false
-                            navigateToNoteEntry()
-                        }
-                    )
-                    DropdownMenuItem(
                         text = { Text(stringResource(R.string.create_task)) },
                         onClick = {
                             showMenu = false
                             navigateToTaskEntry()
                         }
                     )
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.create_note)) },
+                        onClick = {
+                            showMenu = false
+                            navigateToNoteEntry()
+                        }
+                    )
                 }
             }
         }
     ) { paddingValues ->
-        LazyColumn(
-            contentPadding = paddingValues,
-            modifier = Modifier.fillMaxSize()
-        ) {
-            stickyHeader { Text(stringResource(R.string.tasks_header), style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(16.dp)) }
-            if (homeUiState.taskList.isEmpty()) {
-                item { Text(text = stringResource(R.string.no_tasks), modifier = Modifier.padding(16.dp)) }
-            } else {
-                items(homeUiState.taskList) { task ->
-                    TaskItem(
-                        task = task,
-                        onTaskCompletedChange = { onTaskCompletedChange(task, it.isCompleted) },
-                        onTaskClick = { onTaskClick(task.id) }
-                    )
+        Column(modifier = Modifier.padding(paddingValues)) {
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = onSearchQueryChange,
+                label = { Text(stringResource(R.string.search)) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                singleLine = true
+            )
+            LazyColumn(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                stickyHeader { Text(stringResource(R.string.tasks_header), style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(16.dp)) }
+                if (homeUiState.taskList.isEmpty()) {
+                    item { Text(text = stringResource(R.string.no_tasks), modifier = Modifier.padding(16.dp)) }
+                } else {
+                    items(homeUiState.taskList) { task ->
+                        TaskItem(
+                            task = task,
+                            onTaskCompletedChange = { onTaskCompletedChange(task, it.isCompleted) },
+                            onTaskClick = { onTaskClick(task.id) }
+                        )
+                    }
                 }
-            }
 
-            stickyHeader { Text(stringResource(R.string.notes_header), style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(16.dp)) }
-            if (homeUiState.noteList.isEmpty()) {
-                item { Text(text = stringResource(R.string.no_notes), modifier = Modifier.padding(16.dp)) }
-            } else {
-                items(homeUiState.noteList) { note ->
-                    NoteItem(note = note, onClick = { onNoteClick(note.id) })
+                stickyHeader { Text(stringResource(R.string.notes_header), style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(16.dp)) }
+                if (homeUiState.noteList.isEmpty()) {
+                    item { Text(text = stringResource(R.string.no_notes), modifier = Modifier.padding(16.dp)) }
+                } else {
+                    items(homeUiState.noteList) { note ->
+                        NoteItem(note = note, onClick = { onNoteClick(note.id) })
+                    }
                 }
             }
         }

@@ -18,16 +18,6 @@
     <string name="select_time">Selecciona la hora</string>
     <string name="edit_note_title">Editar Nota</string>
     <string name="edit_task_title">Editar Tarea</string>
-    <string name="attach_button">Adjuntar</string>
-    <string name="attach_file">Adjuntar archivo</string>
-    <string name="capture_image">Capturar foto</string>
-    <string name="record_video">Grabar video</string>
-    <string name="record_audio">Grabar audio</string>
-    <string name="attachments_header">Archivos adjuntos</string>
-    <string name="no_attachments">No hay archivos adjuntos.</string>
-    <string name="stop_recording">Detener grabación</string>
-    <string name="play_audio">Reproducir audio</string>
-    <string name="stop_playing">Detener reproducción</string>
 
     <!-- Details -->
     <string name="note_details_title">Detalles de la Nota</string>
@@ -44,4 +34,5 @@
     <string name="status_completed">Completada</string>
     <string name="status_pending">Pendiente</string>
     <string name="select_message">Selecciona una nota o tarea para ver su contenido</string>
+    <string name="search">Buscar</string>
 </resources>
