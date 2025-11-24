@@ -16,6 +16,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -182,7 +183,7 @@ private fun HomeContent(
             LazyColumn(
                 modifier = Modifier.fillMaxSize()
             ) {
-                stickyHeader { Text(stringResource(R.string.tasks_header), style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(16.dp)) }
+                stickyHeader { Surface(modifier = Modifier.fillMaxWidth()) { Text(text = stringResource(R.string.tasks_header), style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(16.dp), color = Color.Black) } }
                 if (homeUiState.taskList.isEmpty()) {
                     item { Text(text = stringResource(R.string.no_tasks), modifier = Modifier.padding(16.dp)) }
                 } else {
@@ -195,7 +196,7 @@ private fun HomeContent(
                     }
                 }
 
-                stickyHeader { Text(stringResource(R.string.notes_header), style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(16.dp)) }
+                stickyHeader { Surface(modifier = Modifier.fillMaxWidth()) { Text(text = stringResource(R.string.notes_header), style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(16.dp), color = Color.Black) } }
                 if (homeUiState.noteList.isEmpty()) {
                     item { Text(text = stringResource(R.string.no_notes), modifier = Modifier.padding(16.dp)) }
                 } else {
