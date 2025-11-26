@@ -1,6 +1,7 @@
 package com.example.proyectofinalweb.screens
 
 import android.Manifest
+import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -83,11 +84,18 @@ fun NoteEditScreen(
     )
 
     val filePickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent(),
+        contract = ActivityResultContracts.OpenDocument(),
         onResult = { uri: Uri? ->
             uri?.let {
-                val mediaType = getMediaType(it)
-                viewModel.addAttachment(Attachment(uri = it.toString(), type = mediaType))
+                try {
+                    val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION or
+                            Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                    contentResolver.takePersistableUriPermission(it, takeFlags)
+                    val mediaType = getMediaType(it)
+                    viewModel.addAttachment(Attachment(uri = it.toString(), type = mediaType))
+                } catch (e: SecurityException) {
+                    e.printStackTrace()
+                }
             }
         }
     )
@@ -150,7 +158,7 @@ fun NoteEditScreen(
                         }
                     }
                     MediaType.FILE -> {
-                        filePickerLauncher.launch("*/*")
+                        filePickerLauncher.launch(arrayOf("*/*"))
                     }
                 }
             },
