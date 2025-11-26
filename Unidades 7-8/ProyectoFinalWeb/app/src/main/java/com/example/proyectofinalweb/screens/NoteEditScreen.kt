@@ -20,6 +20,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.proyectofinalweb.R
 import com.example.proyectofinalweb.model.Attachment
 import com.example.proyectofinalweb.model.MediaType
+import com.example.proyectofinalweb.providers.MiFileProviderMultimedia
 import com.example.proyectofinalweb.ui.AppViewModelProvider
 import com.example.proyectofinalweb.ui.common.AttachmentGrid
 import com.example.proyectofinalweb.ui.note.NoteEditViewModel
@@ -133,7 +134,7 @@ fun NoteEditScreen(
                 when (mediaType) {
                     MediaType.IMAGE -> {
                         if (cameraPermissionState.allPermissionsGranted) {
-                            val newImageUri = createImageUri(context)
+                            val newImageUri = MiFileProviderMultimedia.getImageUri(context)
                             imageUri = newImageUri
                             imagePickerLauncher.launch(newImageUri)
                         } else {
@@ -142,7 +143,7 @@ fun NoteEditScreen(
                     }
                     MediaType.VIDEO -> {
                         if (cameraAndAudioPermissionState.allPermissionsGranted) {
-                            val newVideoUri = createVideoUri(context)
+                            val newVideoUri = MiFileProviderMultimedia.getVideoUri(context)
                             videoUri = newVideoUri
                             videoPickerLauncher.launch(newVideoUri)
                         } else {
