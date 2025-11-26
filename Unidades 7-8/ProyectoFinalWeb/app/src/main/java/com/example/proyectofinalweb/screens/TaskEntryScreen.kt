@@ -233,6 +233,11 @@ fun TaskEntryBody(
                 )
                 DropdownMenuItem(text = { Text(stringResource(R.string.attach_file)) }, onClick = { onAttachmentAdd(MediaType.FILE); showMenu = false })
             }
+            if (taskUiState.isRecordingAudio) {
+                Button(onClick = { onAttachmentAdd(MediaType.AUDIO) }) {
+                    Text(text = stringResource(R.string.stop_recording))
+                }
+            }
         }
 
         AttachmentGrid(attachments = taskUiState.attachments, onAttachmentClick = onAttachmentRemove)
