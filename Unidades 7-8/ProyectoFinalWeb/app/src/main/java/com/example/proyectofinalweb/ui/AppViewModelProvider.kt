@@ -24,7 +24,10 @@ object AppViewModelProvider {
             )
         }
         initializer {
-            NoteEntryViewModel(projectApplication().container.notesRepository)
+            NoteEntryViewModel(
+                projectApplication().container.notesRepository,
+                projectApplication().container.audioRecorder
+            )
         }
         initializer {
             NoteDetailsViewModel(
@@ -35,13 +38,17 @@ object AppViewModelProvider {
         initializer {
             NoteEditViewModel(
                 this.createSavedStateHandle(),
-                projectApplication().container.notesRepository
+                projectApplication().container.notesRepository,
+                projectApplication().container.audioRecorder
             )
         }
 
         // Tasks
         initializer {
-            TaskEntryViewModel(projectApplication().container.tasksRepository)
+            TaskEntryViewModel(
+                projectApplication().container.tasksRepository,
+                projectApplication().container.audioRecorder
+            )
         }
         initializer {
             TaskDetailsViewModel(
@@ -52,7 +59,8 @@ object AppViewModelProvider {
         initializer {
             TaskEditViewModel(
                 this.createSavedStateHandle(),
-                projectApplication().container.tasksRepository
+                projectApplication().container.tasksRepository,
+                projectApplication().container.audioRecorder
             )
         }
     }

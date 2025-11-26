@@ -14,5 +14,6 @@ data class Note(
     val id: Int = 0,
     val title: String,
     val description: String,
-    val type: NoteType
+    val type: NoteType,
+    val attachments: List<Attachment> = emptyList()
 )

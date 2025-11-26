@@ -1,5 +1,6 @@
 package com.example.proyectofinalweb.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -11,9 +12,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.media3.common.MediaItem
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.PlayerView
+import coil.compose.rememberAsyncImagePainter
 import com.example.proyectofinalweb.R
+import com.example.proyectofinalweb.model.Attachment
+import com.example.proyectofinalweb.model.MediaType
 import com.example.proyectofinalweb.ui.AppViewModelProvider
+import com.example.proyectofinalweb.ui.common.AttachmentGrid
 import com.example.proyectofinalweb.ui.note.NoteDetailsViewModel
 import com.example.proyectofinalweb.ui.note.NoteUiState
 import kotlinx.coroutines.launch
@@ -34,6 +43,7 @@ fun NoteDetailsScreen(
     val uiState by viewModel.uiState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     var showDeleteConfirmation by remember { mutableStateOf(false) }
+    var selectedAttachment by remember { mutableStateOf<Attachment?>(null) }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -58,6 +68,7 @@ fun NoteDetailsScreen(
     ) { innerPadding ->
         NoteDetailsBody(
             noteUiState = uiState,
+            onAttachmentClick = { selectedAttachment = it },
             modifier = Modifier.padding(innerPadding)
         )
 
@@ -86,12 +97,17 @@ fun NoteDetailsScreen(
                 }
             )
         }
+
+        selectedAttachment?.let {
+            AttachmentViewer(attachment = it, onDismiss = { selectedAttachment = null })
+        }
     }
 }
 
 @Composable
 private fun NoteDetailsBody(
     noteUiState: NoteUiState,
+    onAttachmentClick: (Attachment) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -118,9 +134,9 @@ private fun NoteDetailsBody(
                     text = noteUiState.title,
                     style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold)
                 )
-                
+
                 Spacer(modifier = Modifier.height(8.dp))
-                
+
                 Divider()
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -136,5 +152,61 @@ private fun NoteDetailsBody(
                 )
             }
         }
+
+        AttachmentGrid(attachments = noteUiState.attachments, onAttachmentClick = onAttachmentClick)
     }
+}
+
+@Composable
+private fun AttachmentViewer(
+    attachment: Attachment,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(attachment.type.name) },
+        text = {
+            when (attachment.type) {
+                MediaType.IMAGE -> {
+                    Image(
+                        painter = rememberAsyncImagePainter(model = attachment.uri),
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+                MediaType.VIDEO, MediaType.AUDIO -> {
+                    val context = androidx.compose.ui.platform.LocalContext.current
+                    val exoPlayer = remember(context) {
+                        ExoPlayer.Builder(context).build().apply {
+                            val mediaItem = MediaItem.fromUri(attachment.uri)
+                            setMediaItem(mediaItem)
+                            prepare()
+                            playWhenReady = true
+                        }
+                    }
+
+                    DisposableEffect(Unit) {
+                        onDispose {
+                            exoPlayer.release()
+                        }
+                    }
+
+                    AndroidView(
+                        factory = { ctx ->
+                            PlayerView(ctx).apply {
+                                player = exoPlayer
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+                else -> {}
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.close_button))
+            }
+        }
+    )
 }

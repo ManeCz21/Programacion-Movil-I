@@ -11,5 +11,6 @@ data class Task(
     val description: String,
     val date: String,
     val time: String,
-    val isCompleted: Boolean = false
+    val isCompleted: Boolean = false,
+    val attachments: List<Attachment> = emptyList()
 )

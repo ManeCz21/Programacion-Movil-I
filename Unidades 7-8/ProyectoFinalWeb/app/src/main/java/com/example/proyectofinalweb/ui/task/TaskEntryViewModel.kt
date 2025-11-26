@@ -5,17 +5,49 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.example.proyectofinalweb.data.TasksRepository
+import com.example.proyectofinalweb.model.Attachment
+import com.example.proyectofinalweb.model.MediaType
+import com.example.proyectofinalweb.util.AudioRecorder
+import java.io.File
 
-class TaskEntryViewModel(private val tasksRepository: TasksRepository) : ViewModel() {
+class TaskEntryViewModel(
+    private val tasksRepository: TasksRepository,
+    private val audioRecorder: AudioRecorder
+) : ViewModel() {
     var taskUiState by mutableStateOf(TaskUiState())
         private set
+
+    private var audioFile: File? = null
 
     fun updateUiState(newTaskUiState: TaskUiState) {
         taskUiState = newTaskUiState
     }
 
+    fun addAttachment(attachment: Attachment) {
+        taskUiState = taskUiState.copy(attachments = taskUiState.attachments + attachment)
+    }
+
+    fun removeAttachment(attachment: Attachment) {
+        taskUiState = taskUiState.copy(attachments = taskUiState.attachments - attachment)
+    }
+
+    fun startAudioRecording() {
+        audioFile = File.createTempFile("audio", ".mp3")
+        audioRecorder.start(audioFile!!)
+        taskUiState = taskUiState.copy(isRecordingAudio = true)
+    }
+
+    fun stopAudioRecording() {
+        audioRecorder.stop()
+        audioFile?.let {
+            addAttachment(Attachment(uri = it.toURI().toString(), type = MediaType.AUDIO))
+        }
+        audioFile = null
+        taskUiState = taskUiState.copy(isRecordingAudio = false)
+    }
+
     suspend fun saveTask() {
-        if (taskUiState.title.isNotBlank() || taskUiState.description.isNotBlank()) {
+        if (taskUiState.title.isNotBlank() || taskUiState.description.isNotBlank() || taskUiState.attachments.isNotEmpty()) {
             tasksRepository.insertTask(taskUiState.toTask())
         }
     }

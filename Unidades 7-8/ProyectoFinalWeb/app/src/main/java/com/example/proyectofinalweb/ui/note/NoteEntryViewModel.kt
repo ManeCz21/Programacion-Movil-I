@@ -5,39 +5,50 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.example.proyectofinalweb.data.NotesRepository
-import com.example.proyectofinalweb.model.Note
-import com.example.proyectofinalweb.model.NoteType
+import com.example.proyectofinalweb.model.Attachment
+import com.example.proyectofinalweb.model.MediaType
+import com.example.proyectofinalweb.util.AudioRecorder
+import java.io.File
 
-class NoteEntryViewModel(private val notesRepository: NotesRepository) : ViewModel() {
+class NoteEntryViewModel(
+    private val notesRepository: NotesRepository,
+    private val audioRecorder: AudioRecorder
+) : ViewModel() {
     var noteUiState by mutableStateOf(NoteUiState())
         private set
+
+    private var audioFile: File? = null
 
     fun updateUiState(newNoteUiState: NoteUiState) {
         noteUiState = newNoteUiState
     }
 
+    fun addAttachment(attachment: Attachment) {
+        noteUiState = noteUiState.copy(attachments = noteUiState.attachments + attachment)
+    }
+
+    fun removeAttachment(attachment: Attachment) {
+        noteUiState = noteUiState.copy(attachments = noteUiState.attachments - attachment)
+    }
+
+    fun startAudioRecording() {
+        audioFile = File.createTempFile("audio", ".mp3")
+        audioRecorder.start(audioFile!!)
+        noteUiState = noteUiState.copy(isRecordingAudio = true)
+    }
+
+    fun stopAudioRecording() {
+        audioRecorder.stop()
+        audioFile?.let {
+            addAttachment(Attachment(uri = it.toURI().toString(), type = MediaType.AUDIO))
+        }
+        audioFile = null
+        noteUiState = noteUiState.copy(isRecordingAudio = false)
+    }
+
     suspend fun saveNote() {
-        if (noteUiState.title.isNotBlank() || noteUiState.description.isNotBlank()) {
+        if (noteUiState.title.isNotBlank() || noteUiState.description.isNotBlank() || noteUiState.attachments.isNotEmpty()) {
             notesRepository.insertNote(noteUiState.toNote())
         }
     }
 }
-
-data class NoteUiState(
-    val id: Int = 0,
-    val title: String = "",
-    val description: String = "",
-) {
-    fun toNote(): Note = Note(
-        id = id,
-        title = title,
-        description = description,
-        type = NoteType.NOTE
-    )
-}
-
-fun Note.toNoteUiState(): NoteUiState = NoteUiState(
-    id = id,
-    title = title,
-    description = description
-)

@@ -1,35 +1,28 @@
-package com.example.proyectofinalweb.ui.task
+package com.example.proyectofinalweb.ui.note
 
 import com.example.proyectofinalweb.model.Attachment
-import com.example.proyectofinalweb.model.Task
+import com.example.proyectofinalweb.model.Note
+import com.example.proyectofinalweb.model.NoteType
 
-data class TaskUiState(
+data class NoteUiState(
     val id: Int = 0,
     val title: String = "",
     val description: String = "",
-    val date: String = "",
-    val time: String = "",
-    val isCompleted: Boolean = false,
     val attachments: List<Attachment> = emptyList(),
     val isRecordingAudio: Boolean = false
 ) {
-    fun toTask(): Task = Task(
+    fun toNote(): Note = Note(
         id = id,
         title = title,
         description = description,
-        date = date,
-        time = time,
-        isCompleted = isCompleted,
+        type = NoteType.NOTE,
         attachments = attachments
     )
 }
 
-fun Task.toTaskUiState(): TaskUiState = TaskUiState(
+fun Note.toNoteUiState(): NoteUiState = NoteUiState(
     id = id,
     title = title,
     description = description,
-    date = date,
-    time = time,
-    isCompleted = isCompleted,
     attachments = attachments
 )

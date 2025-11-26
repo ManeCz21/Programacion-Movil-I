@@ -6,10 +6,12 @@ import com.example.proyectofinalweb.data.OfflineNotesRepository
 import com.example.proyectofinalweb.data.OfflineTasksRepository
 import com.example.proyectofinalweb.data.TasksRepository
 import com.example.proyectofinalweb.db.NoteDatabase
+import com.example.proyectofinalweb.util.AudioRecorder
 
 interface AppContainer {
     val notesRepository: NotesRepository
     val tasksRepository: TasksRepository
+    val audioRecorder: AudioRecorder
 }
 
 class AppDataContainer(private val context: Context) : AppContainer {
@@ -18,5 +20,8 @@ class AppDataContainer(private val context: Context) : AppContainer {
     }
     override val tasksRepository: TasksRepository by lazy {
         OfflineTasksRepository(NoteDatabase.getDatabase(context).taskDao())
+    }
+    override val audioRecorder: AudioRecorder by lazy {
+        AudioRecorder(context)
     }
 }
