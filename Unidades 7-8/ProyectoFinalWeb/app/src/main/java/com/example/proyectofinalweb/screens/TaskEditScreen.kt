@@ -3,7 +3,9 @@ package com.example.proyectofinalweb.screens
 import android.Manifest
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
+import android.content.ContentResolver
 import android.net.Uri
+import android.webkit.MimeTypeMap
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
@@ -41,6 +43,17 @@ fun TaskEditScreen(
 ) {
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
+    val contentResolver = context.contentResolver
+
+    fun getMediaType(uri: Uri): MediaType {
+        val mimeType = contentResolver.getType(uri)
+        return when {
+            mimeType?.startsWith("image") == true -> MediaType.IMAGE
+            mimeType?.startsWith("video") == true -> MediaType.VIDEO
+            mimeType?.startsWith("audio") == true -> MediaType.AUDIO
+            else -> MediaType.FILE
+        }
+    }
 
     LaunchedEffect(taskId) {
         taskId?.let { viewModel.initialize(it) }
@@ -78,7 +91,10 @@ fun TaskEditScreen(
     val filePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent(),
         onResult = { uri: Uri? ->
-            uri?.let { viewModel.addAttachment(Attachment(uri = it.toString(), type = MediaType.FILE)) }
+            uri?.let {
+                val mediaType = getMediaType(it)
+                viewModel.addAttachment(Attachment(uri = it.toString(), type = mediaType))
+            }
         }
     )
 

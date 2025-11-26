@@ -37,6 +37,17 @@ fun NoteEditScreen(
 ) {
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
+    val contentResolver = context.contentResolver
+
+    fun getMediaType(uri: Uri): MediaType {
+        val mimeType = contentResolver.getType(uri)
+        return when {
+            mimeType?.startsWith("image") == true -> MediaType.IMAGE
+            mimeType?.startsWith("video") == true -> MediaType.VIDEO
+            mimeType?.startsWith("audio") == true -> MediaType.AUDIO
+            else -> MediaType.FILE
+        }
+    }
 
     LaunchedEffect(noteId) {
         noteId?.let { viewModel.initialize(it) }
@@ -74,7 +85,10 @@ fun NoteEditScreen(
     val filePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent(),
         onResult = { uri: Uri? ->
-            uri?.let { viewModel.addAttachment(Attachment(uri = it.toString(), type = MediaType.FILE)) }
+            uri?.let {
+                val mediaType = getMediaType(it)
+                viewModel.addAttachment(Attachment(uri = it.toString(), type = mediaType))
+            }
         }
     )
 
