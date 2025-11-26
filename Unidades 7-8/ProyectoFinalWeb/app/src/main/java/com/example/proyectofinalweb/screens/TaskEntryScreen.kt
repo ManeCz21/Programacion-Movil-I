@@ -9,8 +9,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -46,9 +46,6 @@ fun TaskEntryScreen(
     )
     val recordAudioPermissionState = rememberMultiplePermissionsState(
         listOf(Manifest.permission.RECORD_AUDIO)
-    )
-    val readStoragePermissionState = rememberMultiplePermissionsState(
-        listOf(Manifest.permission.READ_EXTERNAL_STORAGE)
     )
 
     var imageUri: Uri? by remember { mutableStateOf(null) }
@@ -87,7 +84,7 @@ fun TaskEntryScreen(
                 title = { Text(stringResource(R.string.create_task)) },
                 navigationIcon = {
                     IconButton(onClick = navigateBack) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.back_button))
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back_button))
                     }
                 },
                 actions = {
@@ -138,11 +135,7 @@ fun TaskEntryScreen(
                         }
                     }
                     MediaType.FILE -> {
-                        if (readStoragePermissionState.allPermissionsGranted) {
-                            filePickerLauncher.launch("*/*")
-                        } else {
-                            readStoragePermissionState.launchMultiplePermissionRequest()
-                        }
+                        filePickerLauncher.launch("*/*")
                     }
                 }
             },

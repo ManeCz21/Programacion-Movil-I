@@ -52,9 +52,6 @@ fun TaskEditScreen(
     val recordAudioPermissionState = rememberMultiplePermissionsState(
         listOf(Manifest.permission.RECORD_AUDIO)
     )
-    val readStoragePermissionState = rememberMultiplePermissionsState(
-        listOf(Manifest.permission.READ_EXTERNAL_STORAGE)
-    )
 
     var imageUri: Uri? by remember { mutableStateOf(null) }
     val imagePickerLauncher = rememberLauncherForActivityResult(
@@ -143,11 +140,7 @@ fun TaskEditScreen(
                         }
                     }
                     MediaType.FILE -> {
-                        if (readStoragePermissionState.allPermissionsGranted) {
-                            filePickerLauncher.launch("*/*")
-                        } else {
-                            readStoragePermissionState.launchMultiplePermissionRequest()
-                        }
+                        filePickerLauncher.launch("*/*")
                     }
                 }
             },
