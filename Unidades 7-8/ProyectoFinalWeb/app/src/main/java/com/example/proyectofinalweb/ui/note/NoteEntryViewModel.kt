@@ -31,6 +31,17 @@ class NoteEntryViewModel(
         noteUiState = noteUiState.copy(attachments = noteUiState.attachments - attachment)
     }
 
+    fun updateAttachmentDescription(attachment: Attachment, description: String) {
+        val updatedAttachments = noteUiState.attachments.map {
+            if (it.uri == attachment.uri) {
+                it.copy(description = description)
+            } else {
+                it
+            }
+        }
+        noteUiState = noteUiState.copy(attachments = updatedAttachments)
+    }
+
     fun startAudioRecording() {
         audioFile = File.createTempFile("audio", ".mp3")
         audioRecorder.start(audioFile!!)

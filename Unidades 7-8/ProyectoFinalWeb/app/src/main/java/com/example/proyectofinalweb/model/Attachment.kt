@@ -8,5 +8,6 @@ data class Attachment(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
     val uri: String,
-    val type: MediaType
+    val type: MediaType,
+    val description: String = ""
 )

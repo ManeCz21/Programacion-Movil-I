@@ -172,7 +172,11 @@ private fun TaskDetailsBody(
             }
         }
 
-        AttachmentGrid(attachments = taskUiState.attachments, onAttachmentClick = onAttachmentClick)
+        AttachmentGrid(
+            attachments = taskUiState.attachments, 
+            onAttachmentClick = onAttachmentClick,
+            onAttachmentDescriptionChange = { _, _ -> }
+        )
     }
 }
 

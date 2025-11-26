@@ -59,6 +59,17 @@ class TaskEditViewModel(
         taskUiState = taskUiState.copy(attachments = taskUiState.attachments - attachment)
     }
 
+    fun updateAttachmentDescription(attachment: Attachment, description: String) {
+        val updatedAttachments = taskUiState.attachments.map {
+            if (it.uri == attachment.uri) {
+                it.copy(description = description)
+            } else {
+                it
+            }
+        }
+        taskUiState = taskUiState.copy(attachments = updatedAttachments)
+    }
+
     fun startAudioRecording() {
         audioFile = File.createTempFile("audio", ".mp3")
         audioRecorder.start(audioFile!!)

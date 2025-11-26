@@ -169,6 +169,7 @@ fun TaskEditScreen(
                 }
             },
             onAttachmentRemove = viewModel::removeAttachment,
+            onAttachmentDescriptionChange = viewModel::updateAttachmentDescription,
             modifier = Modifier.padding(innerPadding)
         )
     }
@@ -180,6 +181,7 @@ fun TaskEditBody(
     onTaskValueChange: (TaskUiState) -> Unit,
     onAttachmentAdd: (MediaType) -> Unit,
     onAttachmentRemove: (Attachment) -> Unit,
+    onAttachmentDescriptionChange: (Attachment, String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -258,6 +260,7 @@ fun TaskEditBody(
         AttachmentGrid(
             attachments = taskUiState.attachments, 
             onAttachmentClick = onAttachmentRemove, 
+            onAttachmentDescriptionChange = onAttachmentDescriptionChange,
             isEditing = true
         )
     }

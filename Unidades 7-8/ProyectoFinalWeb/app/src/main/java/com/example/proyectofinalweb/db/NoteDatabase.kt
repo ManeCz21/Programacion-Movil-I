@@ -9,7 +9,7 @@ import com.example.proyectofinalweb.model.Attachment
 import com.example.proyectofinalweb.model.Note
 import com.example.proyectofinalweb.model.Task
 
-@Database(entities = [Note::class, Task::class, Attachment::class], version = 2, exportSchema = false)
+@Database(entities = [Note::class, Task::class, Attachment::class], version = 3, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class NoteDatabase : RoomDatabase() {
 

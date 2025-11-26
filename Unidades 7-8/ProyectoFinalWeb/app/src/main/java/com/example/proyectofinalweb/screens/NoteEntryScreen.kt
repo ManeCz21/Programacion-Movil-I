@@ -158,6 +158,7 @@ fun NoteEntryScreen(
                 }
             },
             onAttachmentRemove = viewModel::removeAttachment,
+            onAttachmentDescriptionChange = viewModel::updateAttachmentDescription,
             modifier = Modifier.padding(innerPadding)
         )
     }
@@ -169,6 +170,7 @@ fun NoteEntryBody(
     onNoteValueChange: (NoteUiState) -> Unit,
     onAttachmentAdd: (MediaType) -> Unit,
     onAttachmentRemove: (Attachment) -> Unit,
+    onAttachmentDescriptionChange: (Attachment, String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var showMenu by remember { mutableStateOf(false) }
@@ -217,6 +219,7 @@ fun NoteEntryBody(
         AttachmentGrid(
             attachments = noteUiState.attachments, 
             onAttachmentClick = onAttachmentRemove, 
+            onAttachmentDescriptionChange = onAttachmentDescriptionChange,
             isEditing = true
         )
     }

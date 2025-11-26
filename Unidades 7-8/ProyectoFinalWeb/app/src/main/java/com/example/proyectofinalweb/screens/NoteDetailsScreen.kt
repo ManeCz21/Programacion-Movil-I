@@ -153,7 +153,11 @@ private fun NoteDetailsBody(
             }
         }
 
-        AttachmentGrid(attachments = noteUiState.attachments, onAttachmentClick = onAttachmentClick)
+        AttachmentGrid(
+            attachments = noteUiState.attachments, 
+            onAttachmentClick = onAttachmentClick,
+            onAttachmentDescriptionChange = { _, _ -> }
+        )
     }
 }
 
