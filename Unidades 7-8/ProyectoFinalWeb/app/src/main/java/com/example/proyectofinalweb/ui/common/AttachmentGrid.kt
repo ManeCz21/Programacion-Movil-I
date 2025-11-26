@@ -7,10 +7,13 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.PlayCircleFilled
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,7 +27,8 @@ import com.example.proyectofinalweb.model.MediaType
 @Composable
 fun AttachmentGrid(
     attachments: List<Attachment>,
-    onAttachmentClick: (Attachment) -> Unit
+    onAttachmentClick: (Attachment) -> Unit,
+    isEditing: Boolean = false
 ) {
     LazyVerticalGrid(
         columns = GridCells.Adaptive(minSize = 128.dp),
@@ -34,7 +38,8 @@ fun AttachmentGrid(
         items(attachments) { attachment ->
             AttachmentItem(
                 attachment = attachment,
-                onAttachmentClick = onAttachmentClick
+                onAttachmentClick = onAttachmentClick,
+                isEditing = isEditing
             )
         }
     }
@@ -43,13 +48,14 @@ fun AttachmentGrid(
 @Composable
 fun AttachmentItem(
     attachment: Attachment,
-    onAttachmentClick: (Attachment) -> Unit
+    onAttachmentClick: (Attachment) -> Unit,
+    isEditing: Boolean
 ) {
     Box(
         modifier = Modifier
             .padding(4.dp)
             .aspectRatio(1f)
-            .clickable { onAttachmentClick(attachment) },
+            .clickable(enabled = !isEditing) { onAttachmentClick(attachment) },
         contentAlignment = Alignment.Center
     ) {
         when (attachment.type) {
@@ -86,6 +92,22 @@ fun AttachmentItem(
             }
             MediaType.FILE -> {
                 // TODO: Handle file preview
+            }
+        }
+
+        if (isEditing) {
+            IconButton(
+                onClick = { onAttachmentClick(attachment) },
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(4.dp)
+                    .background(Color.Black.copy(alpha = 0.5f), shape = CircleShape)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = "Remove attachment",
+                    tint = Color.White
+                )
             }
         }
     }

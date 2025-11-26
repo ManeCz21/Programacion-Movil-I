@@ -255,6 +255,10 @@ fun TaskEditBody(
             }
         }
 
-        AttachmentGrid(attachments = taskUiState.attachments, onAttachmentClick = onAttachmentRemove)
+        AttachmentGrid(
+            attachments = taskUiState.attachments, 
+            onAttachmentClick = onAttachmentRemove, 
+            isEditing = true
+        )
     }
 }

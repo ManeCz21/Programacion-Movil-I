@@ -214,6 +214,10 @@ fun NoteEntryBody(
             }
         }
 
-        AttachmentGrid(attachments = noteUiState.attachments, onAttachmentClick = onAttachmentRemove)
+        AttachmentGrid(
+            attachments = noteUiState.attachments, 
+            onAttachmentClick = onAttachmentRemove, 
+            isEditing = true
+        )
     }
 }
