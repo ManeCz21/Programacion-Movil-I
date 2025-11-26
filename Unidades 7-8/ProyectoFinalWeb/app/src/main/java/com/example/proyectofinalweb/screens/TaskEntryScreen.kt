@@ -59,6 +59,9 @@ fun TaskEntryScreen(
     val recordAudioPermissionState = rememberMultiplePermissionsState(
         listOf(Manifest.permission.RECORD_AUDIO)
     )
+    val cameraAndAudioPermissionState = rememberMultiplePermissionsState(
+        listOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO)
+    )
 
     var imageUri: Uri? by remember { mutableStateOf(null) }
     val imagePickerLauncher = rememberLauncherForActivityResult(
@@ -137,12 +140,12 @@ fun TaskEntryScreen(
                         }
                     }
                     MediaType.VIDEO -> {
-                        if (cameraPermissionState.allPermissionsGranted) {
+                        if (cameraAndAudioPermissionState.allPermissionsGranted) {
                             val newVideoUri = createVideoUri(context)
                             videoUri = newVideoUri
                             videoPickerLauncher.launch(newVideoUri)
                         } else {
-                            cameraPermissionState.launchMultiplePermissionRequest()
+                            cameraAndAudioPermissionState.launchMultiplePermissionRequest()
                         }
                     }
                     MediaType.AUDIO -> {
