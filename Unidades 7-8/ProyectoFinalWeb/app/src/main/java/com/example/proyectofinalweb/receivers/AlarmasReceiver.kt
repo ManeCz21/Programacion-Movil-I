@@ -14,6 +14,7 @@ class AlarmasReceiver : BroadcastReceiver() {
         val taskId = intent.getIntExtra("EXTRA_TASK_ID", -1)
         if (taskId == -1) return
 
+        val notificationId = intent.getIntExtra("EXTRA_NOTIFICATION_ID", taskId)
         val message = intent.getStringExtra("EXTRA_MESSAGE") ?: "Tarea"
 
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -25,7 +26,7 @@ class AlarmasReceiver : BroadcastReceiver() {
 
         val pendingIntent = PendingIntent.getActivity(
             context,
-            taskId,
+            taskId, // A single request code for all notifications of the same task is OK
             activityIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
@@ -39,6 +40,6 @@ class AlarmasReceiver : BroadcastReceiver() {
             .setAutoCancel(true)
             .build()
 
-        notificationManager.notify(taskId, notification)
+        notificationManager.notify(notificationId, notification)
     }
 }

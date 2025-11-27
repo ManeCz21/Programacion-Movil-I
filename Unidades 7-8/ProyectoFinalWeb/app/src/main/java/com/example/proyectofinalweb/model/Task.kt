@@ -14,6 +14,8 @@ data class Task(
     val date: String, // Vuelve a tener una sola fecha
     val time: String, // Vuelve a tener una sola hora
     val isCompleted: Boolean = false,
-    @TypeConverters(Converters::class) // Mantenemos el conversor para los adjuntos
-    val attachments: List<Attachment> = emptyList()
+    @TypeConverters(Converters::class)
+    val attachments: List<Attachment> = emptyList(),
+    @TypeConverters(Converters::class)
+    val reminders: List<ReminderOption> = emptyList()
 )

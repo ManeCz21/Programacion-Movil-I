@@ -1,16 +1,18 @@
 package com.example.proyectofinalweb.ui.task
 
 import com.example.proyectofinalweb.model.Attachment
+import com.example.proyectofinalweb.model.ReminderOption
 import com.example.proyectofinalweb.model.Task
 
 data class TaskUiState(
     val id: Int = 0,
     val title: String = "",
     val description: String = "",
-    val date: String = "", // Vuelve a tener una sola fecha
-    val time: String = "", // Vuelve a tener una sola hora
+    val date: String = "",
+    val time: String = "",
     val isCompleted: Boolean = false,
     val attachments: List<Attachment> = emptyList(),
+    val reminders: List<ReminderOption> = emptyList(),
     val isRecordingAudio: Boolean = false
 ) {
     fun toTask(): Task = Task(
@@ -20,7 +22,8 @@ data class TaskUiState(
         date = date,
         time = time,
         isCompleted = isCompleted,
-        attachments = attachments
+        attachments = attachments,
+        reminders = reminders
     )
 }
 
@@ -31,5 +34,6 @@ fun Task.toTaskUiState(): TaskUiState = TaskUiState(
     date = date,
     time = time,
     isCompleted = isCompleted,
-    attachments = attachments
+    attachments = attachments,
+    reminders = reminders
 )

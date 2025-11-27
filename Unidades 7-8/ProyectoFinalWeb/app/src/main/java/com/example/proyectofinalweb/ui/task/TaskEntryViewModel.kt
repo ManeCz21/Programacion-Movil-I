@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import com.example.proyectofinalweb.data.TasksRepository
 import com.example.proyectofinalweb.model.Attachment
 import com.example.proyectofinalweb.model.MediaType
+import com.example.proyectofinalweb.model.ReminderOption
 import com.example.proyectofinalweb.util.AudioRecorder
 import com.example.proyectofinalweb.util.setAlarm
 import java.io.File
@@ -32,6 +33,16 @@ class TaskEntryViewModel(
 
     fun removeAttachment(attachment: Attachment) {
         taskUiState = taskUiState.copy(attachments = taskUiState.attachments - attachment)
+    }
+
+    fun addReminder(reminder: ReminderOption) {
+        if (!taskUiState.reminders.contains(reminder)) {
+            taskUiState = taskUiState.copy(reminders = (taskUiState.reminders + reminder).sorted())
+        }
+    }
+
+    fun removeReminder(reminder: ReminderOption) {
+        taskUiState = taskUiState.copy(reminders = taskUiState.reminders - reminder)
     }
 
     fun updateAttachmentDescription(attachment: Attachment, description: String) {

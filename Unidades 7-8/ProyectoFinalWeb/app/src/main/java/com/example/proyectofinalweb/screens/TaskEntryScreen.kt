@@ -16,9 +16,11 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -27,6 +29,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.proyectofinalweb.R
 import com.example.proyectofinalweb.model.Attachment
 import com.example.proyectofinalweb.model.MediaType
+import com.example.proyectofinalweb.model.ReminderOption
 import com.example.proyectofinalweb.providers.MiFileProviderMultimedia
 import com.example.proyectofinalweb.ui.AppViewModelProvider
 import com.example.proyectofinalweb.ui.common.AttachmentGrid
@@ -37,6 +40,8 @@ import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.accompanist.permissions.rememberPermissionState
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.Calendar
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
@@ -147,11 +152,14 @@ fun TaskEntryScreen(
             },
             onAttachmentRemove = viewModel::removeAttachment,
             onAttachmentDescriptionChange = viewModel::updateAttachmentDescription,
+            onAddReminder = viewModel::addReminder,
+            onRemoveReminder = viewModel::removeReminder,
             modifier = Modifier.padding(innerPadding)
         )
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskEntryBody(
     taskUiState: TaskUiState,
@@ -159,10 +167,13 @@ fun TaskEntryBody(
     onAttachmentAdd: (MediaType) -> Unit,
     onAttachmentRemove: (Attachment) -> Unit,
     onAttachmentDescriptionChange: (Attachment, String) -> Unit,
+    onAddReminder: (ReminderOption) -> Unit,
+    onRemoveReminder: (ReminderOption) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
     var showMenu by remember { mutableStateOf(false) }
+    var showReminderMenu by remember { mutableStateOf(false) }
 
     val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
     var hasExactAlarmPermission by remember {
@@ -201,12 +212,75 @@ fun TaskEntryBody(
         DatePickerDialog(context, { _, year, month, day -> onTaskValueChange(taskUiState.copy(date = "$day/${month + 1}/$year")) }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show()
     }
 
+    fun calculateReminderDateTime(taskDate: String, taskTime: String, reminderOption: ReminderOption): LocalDateTime? {
+        if (taskDate.isBlank() || taskTime.isBlank()) return null
+        return try {
+            val dateTimeFormatter = DateTimeFormatter.ofPattern("d/M/yyyy H:m")
+            val taskDateTime = LocalDateTime.parse("$taskDate $taskTime", dateTimeFormatter)
+            when (reminderOption) {
+                ReminderOption.AT_TIME -> taskDateTime
+                ReminderOption.FIVE_MINUTES_BEFORE -> taskDateTime.minusMinutes(5)
+                ReminderOption.TEN_MINUTES_BEFORE -> taskDateTime.minusMinutes(10)
+                ReminderOption.THIRTY_MINUTES_BEFORE -> taskDateTime.minusMinutes(30)
+                ReminderOption.ONE_HOUR_BEFORE -> taskDateTime.minusHours(1)
+                ReminderOption.ONE_DAY_BEFORE -> taskDateTime.minusDays(1)
+            }
+        } catch (e: Exception) {
+            null
+        }
+    }
+
     Column(modifier = modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         OutlinedTextField(value = taskUiState.title, onValueChange = { onTaskValueChange(taskUiState.copy(title = it)) }, label = { Text("Título") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
         OutlinedTextField(value = taskUiState.description, onValueChange = { onTaskValueChange(taskUiState.copy(description = it)) }, label = { Text("Descripción") }, modifier = Modifier.fillMaxWidth())
 
         Text(text = if (taskUiState.date.isEmpty()) "Seleccionar fecha" else taskUiState.date, modifier = Modifier.fillMaxWidth().clickable { showDatePickerDialog() })
         Text(text = if (taskUiState.time.isEmpty()) "Seleccionar hora" else taskUiState.time, modifier = Modifier.fillMaxWidth().clickable { showTimePickerDialog() })
+
+        ExposedDropdownMenuBox(
+            expanded = showReminderMenu,
+            onExpandedChange = { showReminderMenu = !showReminderMenu }
+        ) {
+            OutlinedTextField(
+                value = "Ninguno",
+                onValueChange = {},
+                readOnly = true,
+                label = { Text("Recordatorio") },
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = showReminderMenu) },
+                modifier = Modifier.menuAnchor().fillMaxWidth()
+            )
+            ExposedDropdownMenu(expanded = showReminderMenu, onDismissRequest = { showReminderMenu = false }) {
+                ReminderOption.values().forEach { option ->
+                    DropdownMenuItem(
+                        text = { Text(option.displayName) },
+                        onClick = {
+                            onAddReminder(option)
+                            showReminderMenu = false
+                        }
+                    )
+                }
+            }
+        }
+
+        if (taskUiState.reminders.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text("Recordatorios a guardar:")
+            taskUiState.reminders.forEach { reminder ->
+                val reminderDateTime = calculateReminderDateTime(taskUiState.date, taskUiState.time, reminder)
+                val timeString = reminderDateTime?.format(DateTimeFormatter.ofPattern("dd/MM HH:mm")) ?: ""
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(text = "${reminder.displayName} ($timeString)")
+                    IconButton(onClick = { onRemoveReminder(reminder) }) {
+                        Icon(Icons.Default.Close, contentDescription = "Eliminar recordatorio")
+                    }
+                }
+            }
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 

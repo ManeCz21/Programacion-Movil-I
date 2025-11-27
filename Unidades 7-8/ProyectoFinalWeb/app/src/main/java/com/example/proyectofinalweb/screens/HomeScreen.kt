@@ -68,8 +68,7 @@ fun HomeScreen(
                     )
                 } else if (homeUiState.isEditingTask && homeUiState.selectedTask != null) {
                     TaskEditScreen(
-                        navigateBack = { viewModel.onBackFromEdit() },
-                        taskId = homeUiState.selectedTask!!.id
+                        navigateBack = { viewModel.onBackFromEdit() }
                     )
                 } else if (homeUiState.selectedNote != null) {
                     NoteDetailsScreen(
