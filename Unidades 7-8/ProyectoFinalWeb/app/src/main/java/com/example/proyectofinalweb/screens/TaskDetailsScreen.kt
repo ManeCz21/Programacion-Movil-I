@@ -8,7 +8,6 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -151,15 +150,15 @@ private fun TaskDetailsBody(
                     style = MaterialTheme.typography.bodyLarge
                 )
 
-                Spacer(modifier = Modifier.height(8.dp))
-                Divider()
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
+                if (taskUiState.date.isNotBlank()) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Divider()
+                    Spacer(modifier = Modifier.height(8.dp))
                     InfoColumn(label = stringResource(R.string.date_label), value = taskUiState.date)
+                }
+
+                if (taskUiState.time.isNotBlank()) {
+                    Spacer(modifier = Modifier.height(8.dp))
                     InfoColumn(label = stringResource(R.string.time_label), value = taskUiState.time)
                 }
 

@@ -7,8 +7,8 @@ data class TaskUiState(
     val id: Int = 0,
     val title: String = "",
     val description: String = "",
-    val date: String = "",
-    val time: String = "",
+    val date: String = "", // Vuelve a tener una sola fecha
+    val time: String = "", // Vuelve a tener una sola hora
     val isCompleted: Boolean = false,
     val attachments: List<Attachment> = emptyList(),
     val isRecordingAudio: Boolean = false

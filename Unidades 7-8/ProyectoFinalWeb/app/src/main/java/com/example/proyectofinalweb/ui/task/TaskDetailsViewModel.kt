@@ -29,7 +29,7 @@ class TaskDetailsViewModel(
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000L),
-            initialValue = TaskUiState()
+            initialValue = TaskUiState() // Vuelve al estado inicial simple
         )
 
     suspend fun deleteTask() {

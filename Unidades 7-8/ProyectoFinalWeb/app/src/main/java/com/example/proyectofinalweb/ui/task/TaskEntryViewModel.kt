@@ -1,5 +1,6 @@
 package com.example.proyectofinalweb.ui.task
 
+import android.app.Application
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -8,9 +9,11 @@ import com.example.proyectofinalweb.data.TasksRepository
 import com.example.proyectofinalweb.model.Attachment
 import com.example.proyectofinalweb.model.MediaType
 import com.example.proyectofinalweb.util.AudioRecorder
+import com.example.proyectofinalweb.util.setAlarm
 import java.io.File
 
 class TaskEntryViewModel(
+    private val application: Application,
     private val tasksRepository: TasksRepository,
     private val audioRecorder: AudioRecorder
 ) : ViewModel() {
@@ -59,7 +62,13 @@ class TaskEntryViewModel(
 
     suspend fun saveTask() {
         if (taskUiState.title.isNotBlank() || taskUiState.description.isNotBlank() || taskUiState.attachments.isNotEmpty()) {
-            tasksRepository.insertTask(taskUiState.toTask())
+            val taskToInsert = taskUiState.toTask()
+            val newId = tasksRepository.insertTask(taskToInsert)
+
+            if (newId > 0) {
+                val taskWithId = taskToInsert.copy(id = newId.toInt())
+                taskWithId.setAlarm(application)
+            }
         }
     }
 }

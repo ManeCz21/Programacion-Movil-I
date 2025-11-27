@@ -46,6 +46,7 @@ object AppViewModelProvider {
         // Tasks
         initializer {
             TaskEntryViewModel(
+                projectApplication(),
                 projectApplication().container.tasksRepository,
                 projectApplication().container.audioRecorder
             )
@@ -59,6 +60,7 @@ object AppViewModelProvider {
         initializer {
             TaskEditViewModel(
                 this.createSavedStateHandle(),
+                projectApplication(),
                 projectApplication().container.tasksRepository,
                 projectApplication().container.audioRecorder
             )
