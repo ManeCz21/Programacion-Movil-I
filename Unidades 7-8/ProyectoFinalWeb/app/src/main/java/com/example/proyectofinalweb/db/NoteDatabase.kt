@@ -11,7 +11,7 @@ import com.example.proyectofinalweb.model.Attachment
 import com.example.proyectofinalweb.model.Note
 import com.example.proyectofinalweb.model.Task
 
-@Database(entities = [Note::class, Task::class, Attachment::class], version = 5, exportSchema = false)
+@Database(entities = [Note::class, Task::class, Attachment::class], version = 6, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class NoteDatabase : RoomDatabase() {
 
@@ -25,21 +25,16 @@ abstract class NoteDatabase : RoomDatabase() {
         fun getDatabase(context: Context): NoteDatabase {
             return Instance ?: synchronized(this) {
                 Room.databaseBuilder(context, NoteDatabase::class.java, "app_database")
-                    .addMigrations(MIGRATION_3_4, MIGRATION_4_5)
+                    .addMigrations(MIGRATION_5_6)
+                    .fallbackToDestructiveMigration()
                     .build()
                     .also { Instance = it }
             }
         }
 
-        private val MIGRATION_3_4 = object : Migration(3, 4) {
+        private val MIGRATION_5_6 = object : Migration(5, 6) {
             override fun migrate(db: SupportSQLiteDatabase) {
-                db.execSQL("ALTER TABLE tasks ADD COLUMN reminder TEXT NOT NULL DEFAULT 'Ninguno'")
-            }
-        }
-
-        private val MIGRATION_4_5 = object : Migration(4, 5) {
-            override fun migrate(db: SupportSQLiteDatabase) {
-                // Create the new table with the correct schema
+                // Create the new table with the correct schema (without the old 'reminder' column)
                 db.execSQL("""
                     CREATE TABLE tasks_new (
                         id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
@@ -55,8 +50,8 @@ abstract class NoteDatabase : RoomDatabase() {
 
                 // Copy the data from the old table to the new table
                 db.execSQL("""
-                    INSERT INTO tasks_new (id, title, description, date, time, isCompleted, attachments)
-                    SELECT id, title, description, date, time, isCompleted, attachments FROM tasks
+                    INSERT INTO tasks_new (id, title, description, date, time, isCompleted, attachments, reminders)
+                    SELECT id, title, description, date, time, isCompleted, attachments, reminders FROM tasks
                 """)
 
                 // Drop the old table

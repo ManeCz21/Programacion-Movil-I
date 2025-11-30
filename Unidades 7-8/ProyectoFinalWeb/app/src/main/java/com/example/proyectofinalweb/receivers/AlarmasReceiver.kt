@@ -16,6 +16,18 @@ class AlarmasReceiver : BroadcastReceiver() {
 
         val notificationId = intent.getIntExtra("EXTRA_NOTIFICATION_ID", taskId)
         val message = intent.getStringExtra("EXTRA_MESSAGE") ?: "Tarea"
+        val isReminder = intent.getBooleanExtra("EXTRA_IS_REMINDER", false)
+
+        val title: String
+        val text: String
+
+        if (isReminder) {
+            title = "Recordatorio de Tarea"
+            text = "Tu tarea '$message' está pendiente."
+        } else {
+            title = "Tarea Pendiente"
+            text = "Es hora de tu tarea '$message'."
+        }
 
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
@@ -33,8 +45,8 @@ class AlarmasReceiver : BroadcastReceiver() {
 
         val notification = NotificationCompat.Builder(context, "task_channel")
             .setSmallIcon(R.drawable.ic_launcher_foreground)
-            .setContentTitle("Recordatorio de Tarea")
-            .setContentText("Tu tarea '$message' está pendiente.")
+            .setContentTitle(title)
+            .setContentText(text)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)

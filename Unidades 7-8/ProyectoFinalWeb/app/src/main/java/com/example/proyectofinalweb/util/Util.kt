@@ -38,6 +38,7 @@ fun Task.setAlarm(context: Context) {
                     putExtra("EXTRA_MESSAGE", title)
                     putExtra("EXTRA_TASK_ID", id)
                     putExtra("EXTRA_NOTIFICATION_ID", requestCode) // Pass unique ID for the notification
+                    putExtra("EXTRA_IS_REMINDER", reminder != ReminderOption.AT_TIME)
                 }
 
                 val pendingIntent = PendingIntent.getBroadcast(

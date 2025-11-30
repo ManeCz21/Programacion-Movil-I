@@ -73,7 +73,11 @@ class TaskEntryViewModel(
 
     suspend fun saveTask() {
         if (taskUiState.title.isNotBlank() || taskUiState.description.isNotBlank() || taskUiState.attachments.isNotEmpty()) {
-            val taskToInsert = taskUiState.toTask()
+            val reminders = taskUiState.reminders.toMutableSet()
+            reminders.add(ReminderOption.AT_TIME)
+            val updatedUiState = taskUiState.copy(reminders = reminders.toList())
+
+            val taskToInsert = updatedUiState.toTask()
             val newId = tasksRepository.insertTask(taskToInsert)
 
             if (newId > 0) {

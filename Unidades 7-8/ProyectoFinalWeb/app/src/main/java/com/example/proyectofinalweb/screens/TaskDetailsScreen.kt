@@ -22,11 +22,14 @@ import coil.compose.rememberAsyncImagePainter
 import com.example.proyectofinalweb.R
 import com.example.proyectofinalweb.model.Attachment
 import com.example.proyectofinalweb.model.MediaType
+import com.example.proyectofinalweb.model.ReminderOption
 import com.example.proyectofinalweb.ui.AppViewModelProvider
 import com.example.proyectofinalweb.ui.common.AttachmentGrid
 import com.example.proyectofinalweb.ui.task.TaskDetailsViewModel
 import com.example.proyectofinalweb.ui.task.TaskUiState
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -162,6 +165,28 @@ private fun TaskDetailsBody(
                     InfoColumn(label = stringResource(R.string.time_label), value = taskUiState.time)
                 }
 
+                if (taskUiState.reminders.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Divider()
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Text(
+                        text = "Recordatorios",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    taskUiState.reminders.forEach { reminder ->
+                        val reminderDateTime = calculateReminderDateTime(taskUiState.date, taskUiState.time, reminder)
+                        val timeString = reminderDateTime?.format(DateTimeFormatter.ofPattern("dd/MM HH:mm")) ?: ""
+                        Text(
+                            text = "${reminder.displayName} ($timeString)",
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                }
+
                 Spacer(modifier = Modifier.height(8.dp))
 
                 val statusText = if (taskUiState.isCompleted) stringResource(R.string.status_completed) else stringResource(R.string.status_pending)
@@ -176,6 +201,24 @@ private fun TaskDetailsBody(
             onAttachmentClick = onAttachmentClick,
             onAttachmentDescriptionChange = { _, _ -> }
         )
+    }
+}
+
+private fun calculateReminderDateTime(taskDate: String, taskTime: String, reminderOption: ReminderOption): LocalDateTime? {
+    if (taskDate.isBlank() || taskTime.isBlank()) return null
+    return try {
+        val dateTimeFormatter = DateTimeFormatter.ofPattern("d/M/yyyy H:m")
+        val taskDateTime = LocalDateTime.parse("$taskDate $taskTime", dateTimeFormatter)
+        when (reminderOption) {
+            ReminderOption.AT_TIME -> taskDateTime
+            ReminderOption.FIVE_MINUTES_BEFORE -> taskDateTime.minusMinutes(5)
+            ReminderOption.TEN_MINUTES_BEFORE -> taskDateTime.minusMinutes(10)
+            ReminderOption.THIRTY_MINUTES_BEFORE -> taskDateTime.minusMinutes(30)
+            ReminderOption.ONE_HOUR_BEFORE -> taskDateTime.minusHours(1)
+            ReminderOption.ONE_DAY_BEFORE -> taskDateTime.minusDays(1)
+        }
+    } catch (e: Exception) {
+        null
     }
 }
 

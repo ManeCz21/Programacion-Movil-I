@@ -3,6 +3,7 @@ package com.example.proyectofinalweb.screens
 import android.Manifest
 import android.content.Intent
 import android.net.Uri
+import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
@@ -12,6 +13,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -40,6 +42,10 @@ fun NoteEntryScreen(
     val context = LocalContext.current
     val contentResolver = context.contentResolver
 
+    var cameraPermissionRequested by rememberSaveable { mutableStateOf(false) }
+    var audioPermissionRequested by rememberSaveable { mutableStateOf(false) }
+    var videoPermissionRequested by rememberSaveable { mutableStateOf(false) }
+
     fun getMediaType(uri: Uri): MediaType {
         val mimeType = contentResolver.getType(uri)
         return when {
@@ -52,13 +58,13 @@ fun NoteEntryScreen(
 
     val cameraPermissionState = rememberMultiplePermissionsState(
         listOf(Manifest.permission.CAMERA)
-    )
+    ) { cameraPermissionRequested = true }
     val recordAudioPermissionState = rememberMultiplePermissionsState(
         listOf(Manifest.permission.RECORD_AUDIO)
-    )
+    ) { audioPermissionRequested = true }
     val cameraAndAudioPermissionState = rememberMultiplePermissionsState(
         listOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO)
-    )
+    ) { videoPermissionRequested = true }
 
     var imageUri: Uri? by remember { mutableStateOf(null) }
     val imagePickerLauncher = rememberLauncherForActivityResult(
@@ -99,6 +105,13 @@ fun NoteEntryScreen(
         }
     )
 
+    fun openAppSettings() {
+        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+        val uriValue = Uri.fromParts("package", context.packageName, null)
+        intent.data = uriValue
+        context.startActivity(intent)
+    }
+
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -133,7 +146,11 @@ fun NoteEntryScreen(
                             imageUri = newImageUri
                             imagePickerLauncher.launch(newImageUri)
                         } else {
-                            cameraPermissionState.launchMultiplePermissionRequest()
+                            if (cameraPermissionRequested && !cameraPermissionState.shouldShowRationale) {
+                                openAppSettings()
+                            } else {
+                                cameraPermissionState.launchMultiplePermissionRequest()
+                            }
                         }
                     }
                     MediaType.VIDEO -> {
@@ -142,7 +159,11 @@ fun NoteEntryScreen(
                             videoUri = newVideoUri
                             videoPickerLauncher.launch(newVideoUri)
                         } else {
-                            cameraAndAudioPermissionState.launchMultiplePermissionRequest()
+                            if (videoPermissionRequested && !cameraAndAudioPermissionState.shouldShowRationale) {
+                                openAppSettings()
+                            } else {
+                                cameraAndAudioPermissionState.launchMultiplePermissionRequest()
+                            }
                         }
                     }
                     MediaType.AUDIO -> {
@@ -153,7 +174,11 @@ fun NoteEntryScreen(
                                 viewModel.startAudioRecording()
                             }
                         } else {
-                            recordAudioPermissionState.launchMultiplePermissionRequest()
+                            if (audioPermissionRequested && !recordAudioPermissionState.shouldShowRationale) {
+                                openAppSettings()
+                            } else {
+                                recordAudioPermissionState.launchMultiplePermissionRequest()
+                            }
                         }
                     }
                     MediaType.FILE -> {
