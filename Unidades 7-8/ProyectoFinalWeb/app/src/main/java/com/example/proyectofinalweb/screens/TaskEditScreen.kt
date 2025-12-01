@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -35,10 +36,7 @@ import com.example.proyectofinalweb.ui.AppViewModelProvider
 import com.example.proyectofinalweb.ui.common.AttachmentGrid
 import com.example.proyectofinalweb.ui.task.TaskEditViewModel
 import com.example.proyectofinalweb.ui.task.TaskUiState
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.isGranted
-import com.google.accompanist.permissions.rememberMultiplePermissionsState
-import com.google.accompanist.permissions.rememberPermissionState
+import com.google.accompanist.permissions.*
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -55,18 +53,19 @@ fun TaskEditScreen(
     val context = LocalContext.current
     val contentResolver = context.contentResolver
 
+    var cameraPermissionRequested by rememberSaveable { mutableStateOf(false) }
+    var audioPermissionRequested by rememberSaveable { mutableStateOf(false) }
+    var videoPermissionRequested by rememberSaveable { mutableStateOf(false) }
+    var notificationPermissionRequested by rememberSaveable { mutableStateOf(false) }
+
+    var showPermissionDeniedDialog by remember { mutableStateOf(false) }
+    var permissionDialogText by remember { mutableStateOf("") }
+    var pendingReminderOption by remember { mutableStateOf<ReminderOption?>(null) }
+
     val notificationPermissionState = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        rememberPermissionState(permission = Manifest.permission.POST_NOTIFICATIONS)
+        rememberPermissionState(permission = Manifest.permission.POST_NOTIFICATIONS) { notificationPermissionRequested = true }
     } else {
         null
-    }
-
-    LaunchedEffect(Unit) {
-        notificationPermissionState?.let {
-            if (!it.status.isGranted) {
-                it.launchPermissionRequest()
-            }
-        }
     }
 
     fun getMediaType(uri: Uri): MediaType {
@@ -79,11 +78,35 @@ fun TaskEditScreen(
         }
     }
 
+    fun openAppSettings() {
+        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+        val uriValue = Uri.fromParts("package", context.packageName, null)
+        intent.data = uriValue
+        context.startActivity(intent)
+    }
+
+    if (showPermissionDeniedDialog) {
+        AlertDialog(
+            onDismissRequest = { showPermissionDeniedDialog = false },
+            title = { Text("Permiso Requerido") },
+            text = { Text(permissionDialogText) },
+            confirmButton = {
+                Button(onClick = {
+                    showPermissionDeniedDialog = false
+                    openAppSettings()
+                }) { Text("Ir a Ajustes") }
+            },
+            dismissButton = {
+                Button(onClick = { showPermissionDeniedDialog = false }) { Text("Cancelar") }
+            }
+        )
+    }
+
     var pendingMediaType by remember { mutableStateOf<MediaType?>(null) }
 
-    val cameraPermissionState = rememberMultiplePermissionsState(listOf(Manifest.permission.CAMERA))
-    val recordAudioPermissionState = rememberMultiplePermissionsState(listOf(Manifest.permission.RECORD_AUDIO))
-    val cameraAndAudioPermissionState = rememberMultiplePermissionsState(listOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO))
+    val cameraPermissionState = rememberMultiplePermissionsState(listOf(Manifest.permission.CAMERA)) { cameraPermissionRequested = true }
+    val recordAudioPermissionState = rememberMultiplePermissionsState(listOf(Manifest.permission.RECORD_AUDIO)) { audioPermissionRequested = true }
+    val cameraAndAudioPermissionState = rememberMultiplePermissionsState(listOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO)) { videoPermissionRequested = true }
 
     var imageUri: Uri? by remember { mutableStateOf(null) }
     val imagePickerLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) {
@@ -133,6 +156,15 @@ fun TaskEditScreen(
         }
     }
 
+    notificationPermissionState?.status?.let {
+        LaunchedEffect(it) {
+            if (it.isGranted && pendingReminderOption != null) {
+                viewModel.addReminder(pendingReminderOption!!)
+                pendingReminderOption = null
+            }
+        }
+    }
+
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -161,8 +193,13 @@ fun TaskEditScreen(
                             imageUri = newImageUri
                             imagePickerLauncher.launch(newImageUri)
                         } else {
-                            pendingMediaType = MediaType.IMAGE
-                            cameraPermissionState.launchMultiplePermissionRequest()
+                            if (cameraPermissionRequested && !cameraPermissionState.shouldShowRationale) {
+                                permissionDialogText = "Para tomar una foto, la app necesita permiso para usar la cámara. Por favor, activa el permiso en los ajustes."
+                                showPermissionDeniedDialog = true
+                            } else {
+                                pendingMediaType = MediaType.IMAGE
+                                cameraPermissionState.launchMultiplePermissionRequest()
+                            }
                         }
                     }
                     MediaType.VIDEO -> {
@@ -171,8 +208,13 @@ fun TaskEditScreen(
                             videoUri = newVideoUri
                             videoPickerLauncher.launch(newVideoUri)
                         } else {
-                            pendingMediaType = MediaType.VIDEO
-                            cameraAndAudioPermissionState.launchMultiplePermissionRequest()
+                            if (videoPermissionRequested && !cameraAndAudioPermissionState.shouldShowRationale) {
+                                permissionDialogText = "Para grabar un video, la app necesita permiso para usar la cámara y el micrófono. Por favor, activa los permisos en los ajustes."
+                                showPermissionDeniedDialog = true
+                            } else {
+                                pendingMediaType = MediaType.VIDEO
+                                cameraAndAudioPermissionState.launchMultiplePermissionRequest()
+                            }
                         }
                     }
                     MediaType.AUDIO -> {
@@ -180,8 +222,13 @@ fun TaskEditScreen(
                             if (viewModel.taskUiState.isRecordingAudio) viewModel.stopAudioRecording()
                             else viewModel.startAudioRecording()
                         } else {
-                            pendingMediaType = MediaType.AUDIO
-                            recordAudioPermissionState.launchMultiplePermissionRequest()
+                            if (audioPermissionRequested && !recordAudioPermissionState.shouldShowRationale) {
+                                permissionDialogText = "Para grabar audio, la app necesita permiso para usar el micrófono. Por favor, activa el permiso en los ajustes."
+                                showPermissionDeniedDialog = true
+                            } else {
+                                pendingMediaType = MediaType.AUDIO
+                                recordAudioPermissionState.launchMultiplePermissionRequest()
+                            }
                         }
                     }
                     MediaType.FILE -> filePickerLauncher.launch(arrayOf("*/*"))
@@ -189,7 +236,26 @@ fun TaskEditScreen(
             },
             onAttachmentRemove = viewModel::removeAttachment,
             onAttachmentDescriptionChange = viewModel::updateAttachmentDescription,
-            onAddReminder = viewModel::addReminder,
+            onAddReminder = { reminderOption ->
+                notificationPermissionState?.let {
+                    if (it.status.isGranted) {
+                        viewModel.addReminder(reminderOption)
+                    } else {
+                        when (val status = it.status) {
+                            is PermissionStatus.Denied -> {
+                                if (notificationPermissionRequested && !status.shouldShowRationale) {
+                                    permissionDialogText = "Para recibir notificaciones, la app necesita permiso. Por favor, activa el permiso en los ajustes."
+                                    showPermissionDeniedDialog = true
+                                } else {
+                                    pendingReminderOption = reminderOption
+                                    it.launchPermissionRequest()
+                                }
+                            }
+                            PermissionStatus.Granted -> {}
+                        }
+                    }
+                } ?: viewModel.addReminder(reminderOption)
+            },
             onRemoveReminder = viewModel::removeReminder,
             modifier = Modifier.padding(innerPadding)
         )
