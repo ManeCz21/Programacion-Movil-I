@@ -88,16 +88,16 @@ fun TaskEntryScreen(
     if (showPermissionDeniedDialog) {
         AlertDialog(
             onDismissRequest = { showPermissionDeniedDialog = false },
-            title = { Text("Permiso Requerido") },
+            title = { Text(stringResource(R.string.permission_required)) },
             text = { Text(permissionDialogText) },
             confirmButton = {
                 Button(onClick = {
                     showPermissionDeniedDialog = false
                     openAppSettings()
-                }) { Text("Ir a Ajustes") }
+                }) { Text(stringResource(R.string.go_to_settings)) }
             },
             dismissButton = {
-                Button(onClick = { showPermissionDeniedDialog = false }) { Text("Cancelar") }
+                Button(onClick = { showPermissionDeniedDialog = false }) { Text(stringResource(R.string.cancel)) }
             }
         )
     }
@@ -170,14 +170,14 @@ fun TaskEntryScreen(
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.create_task)) },
-                navigationIcon = { IconButton(onClick = navigateBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back") } },
+                navigationIcon = { IconButton(onClick = navigateBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.back_button)) } },
                 actions = {
                     IconButton(onClick = {
                         coroutineScope.launch {
                             viewModel.saveTask()
                             navigateBack()
                         }
-                    }) { Icon(Icons.Filled.Done, "Save") }
+                    }) { Icon(Icons.Filled.Done, stringResource(R.string.save_button)) }
                 }
             )
         }
@@ -194,7 +194,7 @@ fun TaskEntryScreen(
                             imagePickerLauncher.launch(newImageUri)
                         } else {
                             if (cameraPermissionRequested && !cameraPermissionState.shouldShowRationale) {
-                                permissionDialogText = "Para tomar una foto, la app necesita permiso para usar la cámara. Por favor, activa el permiso en los ajustes."
+                                permissionDialogText = context.getString(R.string.camera_permission_text)
                                 showPermissionDeniedDialog = true
                             } else {
                                 pendingMediaType = MediaType.IMAGE
@@ -209,7 +209,7 @@ fun TaskEntryScreen(
                             videoPickerLauncher.launch(newVideoUri)
                         } else {
                             if (videoPermissionRequested && !cameraAndAudioPermissionState.shouldShowRationale) {
-                                permissionDialogText = "Para grabar un video, la app necesita permiso para usar la cámara y el micrófono. Por favor, activa los permisos en los ajustes."
+                                permissionDialogText = context.getString(R.string.video_permission_text)
                                 showPermissionDeniedDialog = true
                             } else {
                                 pendingMediaType = MediaType.VIDEO
@@ -223,7 +223,7 @@ fun TaskEntryScreen(
                             else viewModel.startAudioRecording()
                         } else {
                             if (audioPermissionRequested && !recordAudioPermissionState.shouldShowRationale) {
-                                permissionDialogText = "Para grabar audio, la app necesita permiso para usar el micrófono. Por favor, activa el permiso en los ajustes."
+                                permissionDialogText = context.getString(R.string.audio_permission_text)
                                 showPermissionDeniedDialog = true
                             } else {
                                 pendingMediaType = MediaType.AUDIO
@@ -244,7 +244,7 @@ fun TaskEntryScreen(
                         when (val status = it.status) {
                             is PermissionStatus.Denied -> {
                                 if (notificationPermissionRequested && !status.shouldShowRationale) {
-                                    permissionDialogText = "Para recibir notificaciones, la app necesita permiso. Por favor, activa el permiso en los ajustes."
+                                    permissionDialogText = context.getString(R.string.notifications_permission_text)
                                     showPermissionDeniedDialog = true
                                 } else {
                                     pendingReminderOption = reminderOption
@@ -290,10 +290,10 @@ fun TaskEntryBody(
     if (showPermissionDialog) {
         AlertDialog(
             onDismissRequest = { showPermissionDialog = false },
-            title = { Text("Permiso Requerido") },
-            text = { Text("Para que los recordatorios funcionen, la app necesita permiso para programar alarmas. Por favor, activa el permiso en los ajustes.") },
-            confirmButton = { Button(onClick = { showPermissionDialog = false; settingsLauncher.launch(Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)) }) { Text("Ir a Ajustes") } },
-            dismissButton = { Button(onClick = { showPermissionDialog = false }) { Text("Cancelar") } }
+            title = { Text(stringResource(R.string.permission_required)) },
+            text = { Text(stringResource(R.string.exact_alarm_permission_text)) },
+            confirmButton = { Button(onClick = { showPermissionDialog = false; settingsLauncher.launch(Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)) }) { Text(stringResource(R.string.go_to_settings)) } },
+            dismissButton = { Button(onClick = { showPermissionDialog = false }) { Text(stringResource(R.string.cancel)) } }
         )
     }
 
@@ -334,28 +334,28 @@ fun TaskEntryBody(
     }
 
     Column(modifier = modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        OutlinedTextField(value = taskUiState.title, onValueChange = { onTaskValueChange(taskUiState.copy(title = it)) }, label = { Text("Título") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
-        OutlinedTextField(value = taskUiState.description, onValueChange = { onTaskValueChange(taskUiState.copy(description = it)) }, label = { Text("Descripción") }, modifier = Modifier.fillMaxWidth())
+        OutlinedTextField(value = taskUiState.title, onValueChange = { onTaskValueChange(taskUiState.copy(title = it)) }, label = { Text(stringResource(R.string.title_label)) }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+        OutlinedTextField(value = taskUiState.description, onValueChange = { onTaskValueChange(taskUiState.copy(description = it)) }, label = { Text(stringResource(R.string.description_label)) }, modifier = Modifier.fillMaxWidth())
 
-        Text(text = if (taskUiState.date.isEmpty()) "Seleccionar fecha" else taskUiState.date, modifier = Modifier.fillMaxWidth().clickable { showDatePickerDialog() })
-        Text(text = if (taskUiState.time.isEmpty()) "Seleccionar hora" else taskUiState.time, modifier = Modifier.fillMaxWidth().clickable { showTimePickerDialog() })
+        Text(text = if (taskUiState.date.isEmpty()) stringResource(R.string.select_date) else taskUiState.date, modifier = Modifier.fillMaxWidth().clickable { showDatePickerDialog() })
+        Text(text = if (taskUiState.time.isEmpty()) stringResource(R.string.select_time) else taskUiState.time, modifier = Modifier.fillMaxWidth().clickable { showTimePickerDialog() })
 
         ExposedDropdownMenuBox(
             expanded = showReminderMenu,
             onExpandedChange = { showReminderMenu = !showReminderMenu }
         ) {
             OutlinedTextField(
-                value = "Ninguno",
+                value = stringResource(R.string.none),
                 onValueChange = {},
                 readOnly = true,
-                label = { Text("Recordatorio") },
+                label = { Text(stringResource(R.string.reminder)) },
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = showReminderMenu) },
                 modifier = Modifier.menuAnchor().fillMaxWidth()
             )
             ExposedDropdownMenu(expanded = showReminderMenu, onDismissRequest = { showReminderMenu = false }) {
                 ReminderOption.values().forEach { option ->
                     DropdownMenuItem(
-                        text = { Text(option.displayName) },
+                        text = { Text(stringResource(option.displayName)) },
                         onClick = {
                             onAddReminder(option)
                             showReminderMenu = false
@@ -367,7 +367,7 @@ fun TaskEntryBody(
 
         if (taskUiState.reminders.isNotEmpty()) {
             Spacer(modifier = Modifier.height(8.dp))
-            Text("Recordatorios a guardar:")
+            Text(stringResource(R.string.reminders_to_save))
             taskUiState.reminders.forEach { reminder ->
                 val reminderDateTime = calculateReminderDateTime(taskUiState.date, taskUiState.time, reminder)
                 val timeString = reminderDateTime?.format(DateTimeFormatter.ofPattern("dd/MM HH:mm")) ?: ""
@@ -377,9 +377,9 @@ fun TaskEntryBody(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(text = "${reminder.displayName} ($timeString)")
+                    Text(text = "${stringResource(reminder.displayName)} ($timeString)")
                     IconButton(onClick = { onRemoveReminder(reminder) }) {
-                        Icon(Icons.Default.Close, contentDescription = "Eliminar recordatorio")
+                        Icon(Icons.Default.Close, contentDescription = stringResource(R.string.delete_reminder))
                     }
                 }
             }
@@ -388,15 +388,15 @@ fun TaskEntryBody(
         Spacer(modifier = Modifier.height(16.dp))
 
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Button(onClick = { showMenu = true }) { Icon(Icons.Default.Add, "Adjuntar"); Text("Adjuntar") }
+            Button(onClick = { showMenu = true }) { Icon(Icons.Default.Add, stringResource(R.string.add_attachment_button)); Text(stringResource(R.string.add_attachment_button)) }
             DropdownMenu(expanded = showMenu, onDismissRequest = { showMenu = false }) {
-                DropdownMenuItem(text = { Text("Tomar foto") }, onClick = { onAttachmentAdd(MediaType.IMAGE); showMenu = false })
-                DropdownMenuItem(text = { Text("Grabar video") }, onClick = { onAttachmentAdd(MediaType.VIDEO); showMenu = false })
-                DropdownMenuItem(text = { Text(if (taskUiState.isRecordingAudio) "Detener grabación" else "Grabar audio") }, onClick = { onAttachmentAdd(MediaType.AUDIO); showMenu = false })
-                DropdownMenuItem(text = { Text("Adjuntar archivo") }, onClick = { onAttachmentAdd(MediaType.FILE); showMenu = false })
+                DropdownMenuItem(text = { Text(stringResource(R.string.take_photo)) }, onClick = { onAttachmentAdd(MediaType.IMAGE); showMenu = false })
+                DropdownMenuItem(text = { Text(stringResource(R.string.record_video)) }, onClick = { onAttachmentAdd(MediaType.VIDEO); showMenu = false })
+                DropdownMenuItem(text = { Text(if (taskUiState.isRecordingAudio) stringResource(R.string.stop_recording) else stringResource(R.string.record_audio)) }, onClick = { onAttachmentAdd(MediaType.AUDIO); showMenu = false })
+                DropdownMenuItem(text = { Text(stringResource(R.string.attach_file)) }, onClick = { onAttachmentAdd(MediaType.FILE); showMenu = false })
             }
             if (taskUiState.isRecordingAudio) {
-                Button(onClick = { onAttachmentAdd(MediaType.AUDIO) }) { Text("Detener grabación") }
+                Button(onClick = { onAttachmentAdd(MediaType.AUDIO) }) { Text(stringResource(R.string.stop_recording)) }
             }
         }
 
