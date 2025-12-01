@@ -79,6 +79,8 @@ fun TaskEditScreen(
         }
     }
 
+    var pendingMediaType by remember { mutableStateOf<MediaType?>(null) }
+
     val cameraPermissionState = rememberMultiplePermissionsState(listOf(Manifest.permission.CAMERA))
     val recordAudioPermissionState = rememberMultiplePermissionsState(listOf(Manifest.permission.RECORD_AUDIO))
     val cameraAndAudioPermissionState = rememberMultiplePermissionsState(listOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO))
@@ -102,6 +104,32 @@ fun TaskEditScreen(
             } catch (e: SecurityException) {
                 e.printStackTrace()
             }
+        }
+    }
+
+    LaunchedEffect(cameraPermissionState.allPermissionsGranted) {
+        if (cameraPermissionState.allPermissionsGranted && pendingMediaType == MediaType.IMAGE) {
+            val newImageUri = MiFileProviderMultimedia.getImageUri(context)
+            imageUri = newImageUri
+            imagePickerLauncher.launch(newImageUri)
+            pendingMediaType = null
+        }
+    }
+
+    LaunchedEffect(recordAudioPermissionState.allPermissionsGranted) {
+        if (recordAudioPermissionState.allPermissionsGranted && pendingMediaType == MediaType.AUDIO) {
+            if (viewModel.taskUiState.isRecordingAudio) viewModel.stopAudioRecording()
+            else viewModel.startAudioRecording()
+            pendingMediaType = null
+        }
+    }
+
+    LaunchedEffect(cameraAndAudioPermissionState.allPermissionsGranted) {
+        if (cameraAndAudioPermissionState.allPermissionsGranted && pendingMediaType == MediaType.VIDEO) {
+            val newVideoUri = MiFileProviderMultimedia.getVideoUri(context)
+            videoUri = newVideoUri
+            videoPickerLauncher.launch(newVideoUri)
+            pendingMediaType = null
         }
     }
 
@@ -132,20 +160,29 @@ fun TaskEditScreen(
                             val newImageUri = MiFileProviderMultimedia.getImageUri(context)
                             imageUri = newImageUri
                             imagePickerLauncher.launch(newImageUri)
-                        } else cameraPermissionState.launchMultiplePermissionRequest()
+                        } else {
+                            pendingMediaType = MediaType.IMAGE
+                            cameraPermissionState.launchMultiplePermissionRequest()
+                        }
                     }
                     MediaType.VIDEO -> {
                         if (cameraAndAudioPermissionState.allPermissionsGranted) {
                             val newVideoUri = MiFileProviderMultimedia.getVideoUri(context)
                             videoUri = newVideoUri
                             videoPickerLauncher.launch(newVideoUri)
-                        } else cameraAndAudioPermissionState.launchMultiplePermissionRequest()
+                        } else {
+                            pendingMediaType = MediaType.VIDEO
+                            cameraAndAudioPermissionState.launchMultiplePermissionRequest()
+                        }
                     }
                     MediaType.AUDIO -> {
                         if (recordAudioPermissionState.allPermissionsGranted) {
                             if (viewModel.taskUiState.isRecordingAudio) viewModel.stopAudioRecording()
                             else viewModel.startAudioRecording()
-                        } else recordAudioPermissionState.launchMultiplePermissionRequest()
+                        } else {
+                            pendingMediaType = MediaType.AUDIO
+                            recordAudioPermissionState.launchMultiplePermissionRequest()
+                        }
                     }
                     MediaType.FILE -> filePickerLauncher.launch(arrayOf("*/*"))
                 }

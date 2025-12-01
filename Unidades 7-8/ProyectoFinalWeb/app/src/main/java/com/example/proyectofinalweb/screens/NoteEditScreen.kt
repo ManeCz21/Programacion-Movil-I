@@ -41,6 +41,8 @@ fun NoteEditScreen(
     val context = LocalContext.current
     val contentResolver = context.contentResolver
 
+    var pendingMediaType by remember { mutableStateOf<MediaType?>(null) }
+
     fun getMediaType(uri: Uri): MediaType {
         val mimeType = contentResolver.getType(uri)
         return when {
@@ -55,54 +57,57 @@ fun NoteEditScreen(
         noteId?.let { viewModel.initialize(it) }
     }
 
-    val cameraPermissionState = rememberMultiplePermissionsState(
-        listOf(Manifest.permission.CAMERA)
-    )
-    val recordAudioPermissionState = rememberMultiplePermissionsState(
-        listOf(Manifest.permission.RECORD_AUDIO)
-    )
-    val cameraAndAudioPermissionState = rememberMultiplePermissionsState(
-        listOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO)
-    )
+    val cameraPermissionState = rememberMultiplePermissionsState(listOf(Manifest.permission.CAMERA))
+    val recordAudioPermissionState = rememberMultiplePermissionsState(listOf(Manifest.permission.RECORD_AUDIO))
+    val cameraAndAudioPermissionState = rememberMultiplePermissionsState(listOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO))
 
     var imageUri: Uri? by remember { mutableStateOf(null) }
-    val imagePickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.TakePicture(),
-        onResult = { success ->
-            if (success) {
-                val currentImageUri = imageUri
-                currentImageUri?.let { viewModel.addAttachment(Attachment(uri = it.toString(), type = MediaType.IMAGE)) }
-            }
-        }
-    )
+    val imagePickerLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) {
+        if (it) imageUri?.let { uri -> viewModel.addAttachment(Attachment(uri = uri.toString(), type = MediaType.IMAGE)) }
+    }
 
     var videoUri: Uri? by remember { mutableStateOf(null) }
-    val videoPickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.CaptureVideo(),
-        onResult = { success ->
-            if (success) {
-                val currentVideoUri = videoUri
-                currentVideoUri?.let { viewModel.addAttachment(Attachment(uri = it.toString(), type = MediaType.VIDEO)) }
-            }
-        }
-    )
+    val videoPickerLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CaptureVideo()) {
+        if (it) videoUri?.let { uri -> viewModel.addAttachment(Attachment(uri = uri.toString(), type = MediaType.VIDEO)) }
+    }
 
-    val filePickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.OpenDocument(),
-        onResult = { uri: Uri? ->
-            uri?.let {
-                try {
-                    val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION or
-                            Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                    contentResolver.takePersistableUriPermission(it, takeFlags)
-                    val mediaType = getMediaType(it)
-                    viewModel.addAttachment(Attachment(uri = it.toString(), type = mediaType))
-                } catch (e: SecurityException) {
-                    e.printStackTrace()
-                }
+    val filePickerLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) {
+        it?.let {
+            try {
+                val takeFlags = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                contentResolver.takePersistableUriPermission(it, takeFlags)
+                viewModel.addAttachment(Attachment(uri = it.toString(), type = getMediaType(it)))
+            } catch (e: SecurityException) {
+                e.printStackTrace()
             }
         }
-    )
+    }
+
+    LaunchedEffect(cameraPermissionState.allPermissionsGranted) {
+        if (cameraPermissionState.allPermissionsGranted && pendingMediaType == MediaType.IMAGE) {
+            val newImageUri = MiFileProviderMultimedia.getImageUri(context)
+            imageUri = newImageUri
+            imagePickerLauncher.launch(newImageUri)
+            pendingMediaType = null
+        }
+    }
+
+    LaunchedEffect(recordAudioPermissionState.allPermissionsGranted) {
+        if (recordAudioPermissionState.allPermissionsGranted && pendingMediaType == MediaType.AUDIO) {
+            if (viewModel.noteUiState.isRecordingAudio) viewModel.stopAudioRecording()
+            else viewModel.startAudioRecording()
+            pendingMediaType = null
+        }
+    }
+
+    LaunchedEffect(cameraAndAudioPermissionState.allPermissionsGranted) {
+        if (cameraAndAudioPermissionState.allPermissionsGranted && pendingMediaType == MediaType.VIDEO) {
+            val newVideoUri = MiFileProviderMultimedia.getVideoUri(context)
+            videoUri = newVideoUri
+            videoPickerLauncher.launch(newVideoUri)
+            pendingMediaType = null
+        }
+    }
 
     Scaffold(
         modifier = modifier,
@@ -138,6 +143,7 @@ fun NoteEditScreen(
                             imageUri = newImageUri
                             imagePickerLauncher.launch(newImageUri)
                         } else {
+                            pendingMediaType = MediaType.IMAGE
                             cameraPermissionState.launchMultiplePermissionRequest()
                         }
                     }
@@ -147,6 +153,7 @@ fun NoteEditScreen(
                             videoUri = newVideoUri
                             videoPickerLauncher.launch(newVideoUri)
                         } else {
+                            pendingMediaType = MediaType.VIDEO
                             cameraAndAudioPermissionState.launchMultiplePermissionRequest()
                         }
                     }
@@ -158,6 +165,7 @@ fun NoteEditScreen(
                                 viewModel.startAudioRecording()
                             }
                         } else {
+                            pendingMediaType = MediaType.AUDIO
                             recordAudioPermissionState.launchMultiplePermissionRequest()
                         }
                     }
