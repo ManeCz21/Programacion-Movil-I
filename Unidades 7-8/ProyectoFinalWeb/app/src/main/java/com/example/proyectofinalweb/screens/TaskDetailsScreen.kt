@@ -171,7 +171,7 @@ private fun TaskDetailsBody(
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Text(
-                        text = "Recordatorios",
+                        text = stringResource(R.string.reminders),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -180,7 +180,7 @@ private fun TaskDetailsBody(
                         val reminderDateTime = calculateReminderDateTime(taskUiState.date, taskUiState.time, reminder)
                         val timeString = reminderDateTime?.format(DateTimeFormatter.ofPattern("dd/MM HH:mm")) ?: ""
                         Text(
-                            text = "${reminder.displayName} ($timeString)",
+                            text = "${stringResource(reminder.displayName)} ($timeString)",
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.SemiBold
                         )
@@ -246,7 +246,6 @@ private fun AttachmentViewer(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(attachment.type.name) },
         text = {
             when (attachment.type) {
                 MediaType.IMAGE -> {

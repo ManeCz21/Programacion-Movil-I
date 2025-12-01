@@ -27,8 +27,7 @@ import com.example.proyectofinalweb.ui.AppViewModelProvider
 import com.example.proyectofinalweb.ui.common.AttachmentGrid
 import com.example.proyectofinalweb.ui.note.NoteEntryViewModel
 import com.example.proyectofinalweb.ui.note.NoteUiState
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import com.google.accompanist.permissions.*
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
@@ -46,6 +45,11 @@ fun NoteEntryScreen(
     var audioPermissionRequested by rememberSaveable { mutableStateOf(false) }
     var videoPermissionRequested by rememberSaveable { mutableStateOf(false) }
 
+    var showPermissionDeniedDialog by remember { mutableStateOf(false) }
+    var permissionDialogText by remember { mutableStateOf("") }
+
+    var pendingMediaType by remember { mutableStateOf<MediaType?>(null) }
+
     fun getMediaType(uri: Uri): MediaType {
         val mimeType = contentResolver.getType(uri)
         return when {
@@ -56,60 +60,80 @@ fun NoteEntryScreen(
         }
     }
 
-    val cameraPermissionState = rememberMultiplePermissionsState(
-        listOf(Manifest.permission.CAMERA)
-    ) { cameraPermissionRequested = true }
-    val recordAudioPermissionState = rememberMultiplePermissionsState(
-        listOf(Manifest.permission.RECORD_AUDIO)
-    ) { audioPermissionRequested = true }
-    val cameraAndAudioPermissionState = rememberMultiplePermissionsState(
-        listOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO)
-    ) { videoPermissionRequested = true }
+    val cameraPermissionState = rememberMultiplePermissionsState(listOf(Manifest.permission.CAMERA)) { cameraPermissionRequested = true }
+    val recordAudioPermissionState = rememberMultiplePermissionsState(listOf(Manifest.permission.RECORD_AUDIO)) { audioPermissionRequested = true }
+    val cameraAndAudioPermissionState = rememberMultiplePermissionsState(listOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO)) { videoPermissionRequested = true }
 
     var imageUri: Uri? by remember { mutableStateOf(null) }
-    val imagePickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.TakePicture(),
-        onResult = { success ->
-            if (success) {
-                val currentImageUri = imageUri
-                currentImageUri?.let { viewModel.addAttachment(Attachment(uri = it.toString(), type = MediaType.IMAGE)) }
-            }
-        }
-    )
+    val imagePickerLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) {
+        if (it) imageUri?.let { uri -> viewModel.addAttachment(Attachment(uri = uri.toString(), type = MediaType.IMAGE)) }
+    }
 
     var videoUri: Uri? by remember { mutableStateOf(null) }
-    val videoPickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.CaptureVideo(),
-        onResult = { success ->
-            if (success) {
-                val currentVideoUri = videoUri
-                currentVideoUri?.let { viewModel.addAttachment(Attachment(uri = it.toString(), type = MediaType.VIDEO)) }
-            }
-        }
-    )
+    val videoPickerLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CaptureVideo()) {
+        if (it) videoUri?.let { uri -> viewModel.addAttachment(Attachment(uri = uri.toString(), type = MediaType.VIDEO)) }
+    }
 
-    val filePickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.OpenDocument(),
-        onResult = { uri: Uri? ->
-            uri?.let {
-                try {
-                    val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION or
-                            Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                    contentResolver.takePersistableUriPermission(it, takeFlags)
-                    val mediaType = getMediaType(it)
-                    viewModel.addAttachment(Attachment(uri = it.toString(), type = mediaType))
-                } catch (e: SecurityException) {
-                    e.printStackTrace()
-                }
+    val filePickerLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) {
+        it?.let {
+            try {
+                val takeFlags = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                contentResolver.takePersistableUriPermission(it, takeFlags)
+                viewModel.addAttachment(Attachment(uri = it.toString(), type = getMediaType(it)))
+            } catch (e: SecurityException) {
+                e.printStackTrace()
             }
         }
-    )
+    }
+
+    LaunchedEffect(cameraPermissionState.allPermissionsGranted) {
+        if (cameraPermissionState.allPermissionsGranted && pendingMediaType == MediaType.IMAGE) {
+            val newImageUri = MiFileProviderMultimedia.getImageUri(context)
+            imageUri = newImageUri
+            imagePickerLauncher.launch(newImageUri)
+            pendingMediaType = null
+        }
+    }
+
+    LaunchedEffect(recordAudioPermissionState.allPermissionsGranted) {
+        if (recordAudioPermissionState.allPermissionsGranted && pendingMediaType == MediaType.AUDIO) {
+            if (viewModel.noteUiState.isRecordingAudio) viewModel.stopAudioRecording()
+            else viewModel.startAudioRecording()
+            pendingMediaType = null
+        }
+    }
+
+    LaunchedEffect(cameraAndAudioPermissionState.allPermissionsGranted) {
+        if (cameraAndAudioPermissionState.allPermissionsGranted && pendingMediaType == MediaType.VIDEO) {
+            val newVideoUri = MiFileProviderMultimedia.getVideoUri(context)
+            videoUri = newVideoUri
+            videoPickerLauncher.launch(newVideoUri)
+            pendingMediaType = null
+        }
+    }
 
     fun openAppSettings() {
         val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
         val uriValue = Uri.fromParts("package", context.packageName, null)
         intent.data = uriValue
         context.startActivity(intent)
+    }
+
+    if (showPermissionDeniedDialog) {
+        AlertDialog(
+            onDismissRequest = { showPermissionDeniedDialog = false },
+            title = { Text("Permiso Requerido") },
+            text = { Text(permissionDialogText) },
+            confirmButton = {
+                Button(onClick = {
+                    showPermissionDeniedDialog = false
+                    openAppSettings()
+                }) { Text("Ir a Ajustes") }
+            },
+            dismissButton = {
+                Button(onClick = { showPermissionDeniedDialog = false }) { Text("Cancelar") }
+            }
+        )
     }
 
     Scaffold(
@@ -147,8 +171,10 @@ fun NoteEntryScreen(
                             imagePickerLauncher.launch(newImageUri)
                         } else {
                             if (cameraPermissionRequested && !cameraPermissionState.shouldShowRationale) {
-                                openAppSettings()
+                                permissionDialogText = "Para tomar una foto, la app necesita permiso para usar la cámara. Por favor, activa el permiso en los ajustes."
+                                showPermissionDeniedDialog = true
                             } else {
+                                pendingMediaType = MediaType.IMAGE
                                 cameraPermissionState.launchMultiplePermissionRequest()
                             }
                         }
@@ -160,8 +186,10 @@ fun NoteEntryScreen(
                             videoPickerLauncher.launch(newVideoUri)
                         } else {
                             if (videoPermissionRequested && !cameraAndAudioPermissionState.shouldShowRationale) {
-                                openAppSettings()
+                                permissionDialogText = "Para grabar un video, la app necesita permiso para usar la cámara y el micrófono. Por favor, activa los permisos en los ajustes."
+                                showPermissionDeniedDialog = true
                             } else {
+                                pendingMediaType = MediaType.VIDEO
                                 cameraAndAudioPermissionState.launchMultiplePermissionRequest()
                             }
                         }
@@ -175,8 +203,10 @@ fun NoteEntryScreen(
                             }
                         } else {
                             if (audioPermissionRequested && !recordAudioPermissionState.shouldShowRationale) {
-                                openAppSettings()
+                                permissionDialogText = "Para grabar audio, la app necesita permiso para usar el micrófono. Por favor, activa el permiso en los ajustes."
+                                showPermissionDeniedDialog = true
                             } else {
+                                pendingMediaType = MediaType.AUDIO
                                 recordAudioPermissionState.launchMultiplePermissionRequest()
                             }
                         }

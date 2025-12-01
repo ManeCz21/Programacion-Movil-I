@@ -168,7 +168,6 @@ private fun AttachmentViewer(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(attachment.type.name) },
         text = {
             when (attachment.type) {
                 MediaType.IMAGE -> {

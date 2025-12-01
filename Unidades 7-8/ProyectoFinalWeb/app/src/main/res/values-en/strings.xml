@@ -24,6 +24,25 @@
     <string name="record_audio">Record Audio</string>
     <string name="attach_file">Attach File</string>
     <string name="stop_recording">Stop Recording</string>
+    <string name="permission_required">Permission Required</string>
+    <string name="go_to_settings">Go to Settings</string>
+    <string name="cancel">Cancel</string>
+    <string name="camera_permission_text">To take a photo, the app needs permission to use the camera. Please enable the permission in the settings.</string>
+    <string name="video_permission_text">To record a video, the app needs permission to use the camera and microphone. Please enable the permissions in the settings.</string>
+    <string name="audio_permission_text">To record audio, the app needs permission to use the microphone. Please enable the permission in the settings.</string>
+    <string name="notifications_permission_text">To receive notifications, the app needs permission. Please enable the permission in the settings.</string>
+    <string name="exact_alarm_permission_text">For reminders to work, the app needs permission to schedule alarms. Please enable the permission in the settings.</string>
+    <string name="reminder">Reminder</string>
+    <string name="reminders">Reminders</string>
+    <string name="none">None</string>
+    <string name="at_time">At time</string>
+    <string name="five_minutes_before">5 minutes before</string>
+    <string name="ten_minutes_before">10 minutes before</string>
+    <string name="thirty_minutes_before">30 minutes before</string>
+    <string name="one_hour_before">1 hour before</string>
+    <string name="one_day_before">1 day before</string>
+    <string name="reminders_to_save">Reminders to save:</string>
+    <string name="delete_reminder">Delete reminder</string>
 
     <!-- Details -->
     <string name="note_details_title">Note Details</string>

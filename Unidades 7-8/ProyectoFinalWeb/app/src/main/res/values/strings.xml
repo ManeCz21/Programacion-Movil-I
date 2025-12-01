@@ -24,6 +24,25 @@
     <string name="record_audio">Grabar audio</string>
     <string name="attach_file">Adjuntar archivo</string>
     <string name="stop_recording">Detener grabación</string>
+    <string name="permission_required">Permiso Requerido</string>
+    <string name="go_to_settings">Ir a Ajustes</string>
+    <string name="cancel">Cancelar</string>
+    <string name="camera_permission_text">Para tomar una foto, la app necesita permiso para usar la cámara. Por favor, activa el permiso en los ajustes.</string>
+    <string name="video_permission_text">Para grabar un video, la app necesita permiso para usar la cámara y el micrófono. Por favor, activa los permisos en los ajustes.</string>
+    <string name="audio_permission_text">Para grabar audio, la app necesita permiso para usar el micrófono. Por favor, activa el permiso en los ajustes.</string>
+    <string name="notifications_permission_text">Para recibir notificaciones, la app necesita permiso. Por favor, activa el permiso en los ajustes.</string>
+    <string name="exact_alarm_permission_text">Para que los recordatorios funcionen, la app necesita permiso para programar alarmas. Por favor, activa el permiso en los ajustes.</string>
+    <string name="reminder">Recordatorio</string>
+    <string name="reminders">Recordatorios</string>
+    <string name="none">Ninguno</string>
+    <string name="at_time">Al momento</string>
+    <string name="five_minutes_before">5 minutos antes</string>
+    <string name="ten_minutes_before">10 minutos antes</string>
+    <string name="thirty_minutes_before">30 minutos antes</string>
+    <string name="one_hour_before">1 hora antes</string>
+    <string name="one_day_before">1 día antes</string>
+    <string name="reminders_to_save">Recordatorios a guardar:</string>
+    <string name="delete_reminder">Eliminar recordatorio</string>
 
     <!-- Details -->
     <string name="note_details_title">Detalles de la Nota</string>
